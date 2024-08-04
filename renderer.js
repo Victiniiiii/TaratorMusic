@@ -797,9 +797,7 @@ function randomPlaylistFunctionMainMenu() {
             selectedPlaylist = allThePlaylists[randomIndex];
         }
     }
-
-    const playlistSongs = selectedPlaylist.querySelectorAll('.playlistInfoandSongs .playlist-songs .playlist-song');
-    playlistSongs[0].click();
+    selectedPlaylist.querySelectorAll('.playlistInfoandSongs .playlist-songs .playlist-song')[0].click();
 }
 
 let rememberautoplay = JSON.parse(localStorage.getItem('rememberautoplay')) || false;
