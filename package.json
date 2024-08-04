@@ -1,0 +1,26 @@
+{
+    "name": "taratormusic",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "start": "electron ."
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+        "electron": "^31.1.0",
+        "electron-reload": "^2.0.0-alpha.1"
+    },
+    "dependencies": {
+        "discord-rich-presence": "^0.0.8",
+        "discord-rpc": "^4.0.1",
+        "electron-is-dev": "^3.0.1",
+        "ytdl-core": "^4.11.5"
+    },
+    "build": {
+        "productName": "TaratorMusic",
+        "icon": "thumbnails/tarator16_icon"
+    }
+}
