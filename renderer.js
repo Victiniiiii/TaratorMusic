@@ -773,6 +773,15 @@ function playNextSong() {
     }
 }
 
+function randomSongFunctionMainMenu() {
+    const musicItems = Array.from(document.querySelectorAll('.music-item'));
+    let randomIndex = Math.floor(Math.random() * musicItems.length);
+    
+    nextSongName = musicItems[randomIndex].getAttribute('data-file-name');
+    const file = { name: nextSongName };
+    playMusic(file, document.querySelector(`.music-item[data-file-name="${nextSongName}.mp3"]`), true);
+}
+
 let rememberautoplay = JSON.parse(localStorage.getItem('rememberautoplay')) || false;
 if (rememberautoplay == true) {toggleAutoplay()}
 let remembershuffle = JSON.parse(localStorage.getItem('remembershuffle')) || false;
@@ -1443,3 +1452,6 @@ function saveeeAsPlaylist(theArrayThatIWillGiveToPython) {
         });
     }
 }
+
+document.getElementById('my-music').click();
+document.getElementById('main-menu').click();
