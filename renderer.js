@@ -457,24 +457,17 @@ function createPlaylistElement(playlist) {
     const playlistElement = document.createElement('div');
     playlistElement.className = 'playlist';
     playlistElement.setAttribute('data-playlist-name', playlist.name);
+    const thumbnailPath = path.join(taratorFolder, 'thumbnails', playlist.name + "_playlist.jpg");
+    console.log(thumbnailPath)
     
-    let thumbnailSrc = '';
-    if (playlist.thumbnail) {
+    let thumbnailSrc = ``;
+    if (fs.existsSync(thumbnailPath)) {
+        thumbnailSrc = `file://${thumbnailPath.replace(/\\/g, '/')}`;
         thumbnailSrc = playlist.thumbnail;
-    } else if (playlist.songs && playlist.songs.length > 0) {
-        const fileNameWithoutExtension = path.parse(playlist.songs[0]).name;
-        const thumbnailFolder = path.join(taratorFolder, 'thumbnails');
-        const thumbnailFileName = `${fileNameWithoutExtension}_thumbnail.jpg`;
-        const thumbnailPath = path.join(thumbnailFolder, thumbnailFileName.replace(/%20/g, ' '));
-        
-        if (fs.existsSync(thumbnailPath)) {
-            thumbnailSrc = `file://${thumbnailPath.replace(/\\/g, '/')}`;
-        } else {
-            thumbnailSrc = `file://${path.join(thumbnailFolder, '_placeholder.jpg').replace(/\\/g, '/')}`;
-            console.log(`Failed to find thumbnail for playlist ${playlist.name}. Using placeholder.`);
-        }
+        console.log("Exists")
     } else {
         thumbnailSrc = `file://${path.join(taratorFolder, 'thumbnails', '_placeholder.jpg').replace(/\\/g, '/')}`;
+        console.log("doesnt")
     }
     
     const thumbnail = document.createElement('img');
@@ -586,6 +579,9 @@ function saveEditPlaylist() {
                             return;
                         }
                         console.log('Playlist updated successfully');
+                        closeModal();
+                        document.getElementById('settings').click();
+                        document.getElementById('playlists').click();
                     });
                 });
             } else {
@@ -597,15 +593,16 @@ function saveEditPlaylist() {
                         return;
                     }
                     console.log('Playlist updated successfully');
+                    closeModal();
+                    document.getElementById('settings').click();
+                    document.getElementById('playlists').click();
                 });
             }
         } else {
             console.error('Playlist not found:', oldName);
             return;
         }
-    });
-    document.getElementById('my-music').click();
-    document.getElementById('playlists').click();
+    });    
 }
 
 function displayPlaylists(playlists) {
@@ -936,7 +933,7 @@ document.getElementById('savePlaylistButton').addEventListener('click', () => {
     if (thumbnailInput.files.length > 0) {
         thumbnailFilePath = thumbnailInput.files[0].path;
     } else {
-        dialog.showErrorBox('Thumbnail Error', 'Please select a thumbnail for the playlist.');
+        alert('Please select a thumbnail for the playlist.');
         return;
     }
 
@@ -965,7 +962,7 @@ document.getElementById('customizeForm').addEventListener('submit', function(eve
     const oldThumbnailPath = document.getElementById('customizeForm').dataset.oldThumbnailPath.replace('.mp3', '');    
     const newSongName = document.getElementById('customizeSongName').value;
     const newThumbnailFile = document.getElementById('customizeThumbnail').files[0];    
-    const userDesktop = path.join(taratorFolder, 'musics'); // TODO: Confusing name
+    const userDesktop = path.join(taratorFolder, 'musics'); // TODO: Confusing name bunların hepsini al tepeye koy
     const oldSongFilePath = path.join(userDesktop, oldSongName);    
     let newSongFilePath = path.join(userDesktop, newSongName + path.extname(oldSongName));
     
@@ -1397,44 +1394,48 @@ function removeSong() {
         if (fs.existsSync(musicFilePath)) { fs.unlinkSync(musicFilePath); } 
         if (fs.existsSync(thumbnailFilePath)) { fs.unlinkSync(thumbnailFilePath); } 
         closeModal();
+        document.getElementById('my-music').click();
     }
 }
 
 function deletePlaylist() {
-    const playlistName = document.getElementById('editInvisibleName').value;
-    const filePath = path.join(taratorFolder, 'playlists.json');
-    fs.readFile(filePath, 'utf8', (err, data) => {
-        if (err) {
-            console.error('Error reading file:', err);
-            return;
-        }
-
-        let playlists;
-        try {
-            playlists = JSON.parse(data);
-        } catch (parseErr) {
-            console.error('Error parsing JSON:', parseErr);
-            return;
-        }
-
-        const playlistIndex = playlists.findIndex(pl => pl.name === playlistName);
-        if (playlistIndex !== -1) {
-            playlists.splice(playlistIndex, 1);
-        } else {
-            console.error('Playlist not found:', playlistName);
-            return;
-        }
-
-        fs.writeFile(filePath, JSON.stringify(playlists, null, 2), 'utf8', (writeErr) => {
-            if (writeErr) {
-                console.error('Error writing file:', writeErr);
+    if (confirm('Are you sure you want to remove this playlist?')) {
+        const playlistName = document.getElementById('editInvisibleName').value;
+        const filePath = path.join(taratorFolder, 'playlists.json'); 
+        fs.readFile(filePath, 'utf8', (err, data) => {
+            if (err) {
+                console.error('Error reading file:', err);
                 return;
             }
-            console.log('Playlist deleted successfully');
+
+            let playlists;
+            try {
+                playlists = JSON.parse(data);
+            } catch (parseErr) {
+                console.error('Error parsing JSON:', parseErr);
+                return;
+            }
+
+            const playlistIndex = playlists.findIndex(pl => pl.name === playlistName);
+            if (playlistIndex !== -1) {
+                playlists.splice(playlistIndex, 1);
+            } else {
+                console.error('Playlist not found:', playlistName);
+                return;
+            }
+
+            fs.writeFile(filePath, JSON.stringify(playlists, null, 2), 'utf8', (writeErr) => {
+                if (writeErr) {
+                    console.error('Error writing file:', writeErr);
+                    return;
+                }
+                console.log('Playlist deleted successfully');
+                closeModal();
+                document.getElementById('my-music').click();
+                document.getElementById('playlists').click();
+            });
         });
-    });
-    document.getElementById('my-music').click();
-    document.getElementById('playlists').click();
+    }
 }
 
 function differentiateYouTubeLinks(url) {

@@ -133,14 +133,9 @@ ipcMain.on('add-to-playlist', (event, { playlistName, patates }) => {
 });
 
 ipcMain.on('create-playlist', (event, playlistData) => {
-    const { playlistName, useFirstSongThumbnail, thumbnailFilePath } = playlistData;
-    
-    const playlistsDirectory = path.join(taratorFolder, 'playlists');
+    const { playlistName, thumbnailFilePath } = playlistData;    
+    const thumbnailsDirectory = path.join(taratorFolder, 'thumbnails');
     const playlistsFilePath = path.join(taratorFolder, 'playlists.json');
-
-    if (!fs.existsSync(playlistsDirectory)) {
-        fs.mkdirSync(playlistsDirectory); // Burayı kaldır uygulama bitince
-    }
 
     fs.readFile(playlistsFilePath, 'utf8', (err, data) => {
         let playlists = [];
@@ -148,8 +143,7 @@ ipcMain.on('create-playlist', (event, playlistData) => {
         if (!err && data) {
             try {
                 playlists = JSON.parse(data);
-                const duplicate = playlists.find(playlist => playlist.name === playlistName);
-                if (duplicate) { // üst satırı buraya at const'a gerek yok
+                if (playlists.find(playlist => playlist.name === playlistName)) {
                     event.reply('playlist-creation-error', 'Playlist name already exists.'); 
                     return; 
                 }
@@ -161,7 +155,7 @@ ipcMain.on('create-playlist', (event, playlistData) => {
         const newPlaylist = {
             name: playlistName,
             songs: [],
-            thumbnail: path.join(playlistsDirectory, `${playlistName}_playlist.jpg`)
+            thumbnail: path.join(thumbnailsDirectory, `${playlistName}_playlist.jpg`)
         };
 
         playlists.push(newPlaylist);
@@ -172,7 +166,7 @@ ipcMain.on('create-playlist', (event, playlistData) => {
                 return;
             }
             if (thumbnailFilePath) {
-                const newThumbnailPath = path.join(playlistsDirectory, `${playlistName}_playlist.jpg`);
+                const newThumbnailPath = path.join(thumbnailsDirectory, `${playlistName}_playlist.jpg`);
                 fs.copyFile(thumbnailFilePath, newThumbnailPath, (copyErr) => {
                     if (copyErr) {
                         console.error('Error copying thumbnail file:', copyErr);
