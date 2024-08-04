@@ -776,7 +776,12 @@ function playNextSong() {
 function randomSongFunctionMainMenu() {
     const musicItems = Array.from(document.querySelectorAll('.music-item'));
     let randomIndex = Math.floor(Math.random() * musicItems.length);
-    
+    if (currentPlayingElement) {
+        console.log(musicItems[randomIndex].getAttribute('data-file-name'))
+        while (musicItems[randomIndex].getAttribute('data-file-name') === document.getElementById('song-name').innerText+".mp3") {
+            randomIndex = Math.floor(Math.random() * musicItems.length);
+        }
+    }    
     nextSongName = musicItems[randomIndex].getAttribute('data-file-name');
     const file = { name: nextSongName };
     playMusic(file, document.querySelector(`.music-item[data-file-name="${nextSongName}.mp3"]`), true);
@@ -1454,4 +1459,6 @@ function saveeeAsPlaylist(theArrayThatIWillGiveToPython) {
 }
 
 document.getElementById('my-music').click();
+document.getElementById('playlists').click();
+document.getElementById('settings').click();
 document.getElementById('main-menu').click();
