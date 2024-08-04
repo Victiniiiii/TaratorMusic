@@ -458,16 +458,13 @@ function createPlaylistElement(playlist) {
     playlistElement.className = 'playlist';
     playlistElement.setAttribute('data-playlist-name', playlist.name);
     const thumbnailPath = path.join(taratorFolder, 'thumbnails', playlist.name + "_playlist.jpg");
-    console.log(thumbnailPath)
     
     let thumbnailSrc = ``;
     if (fs.existsSync(thumbnailPath)) {
         thumbnailSrc = `file://${thumbnailPath.replace(/\\/g, '/')}`;
         thumbnailSrc = playlist.thumbnail;
-        console.log("Exists")
     } else {
         thumbnailSrc = `file://${path.join(taratorFolder, 'thumbnails', '_placeholder.jpg').replace(/\\/g, '/')}`;
-        console.log("doesnt")
     }
     
     const thumbnail = document.createElement('img');
@@ -691,6 +688,7 @@ async function playPlaylist(playlist, startingIndex = 0) {
         currentPlaylistElement = i;
         const clickedElement = document.querySelector(`.music-item[data-file-name="${songName}.mp3"]`);
         await playMusic(file, clickedElement, true);
+        if (!isAutoplayActive) {break;}
     }
 }
 
@@ -992,17 +990,19 @@ document.getElementById('customizeForm').addEventListener('submit', function(eve
         } else {
             console.error('Old thumbnail file does not exist:', oldThumbnailPath);
         }
+        console.log("THis function ran")
     }
 
     const playlistsFilePath = path.join(taratorFolder, 'playlists.json');
     if (fs.existsSync(playlistsFilePath)) {
         let playlistsData = fs.readFileSync(playlistsFilePath, 'utf8');
         playlistsData = JSON.parse(playlistsData);
+        console.log("oldSongName",oldSongName,"newSongName",newSongName,"oldSongName.slice(0,-4)",oldSongName.slice(0,-4))
         
         for (const playlist of playlistsData) {
-            console.log("Checking Playlist");
             for (let i = 0; i < playlist.songs.length; i++) {
-                if (playlist.songs[i] == oldSongName) {
+                console.log(playlist.songs[i])
+                if (playlist.songs[i] == oldSongName.slice(0,-4)) {                    
                     playlist.songs[i] = newSongName+".mp3";
                 }
             }
