@@ -427,6 +427,7 @@ video, audio {
     grid-auto-rows: 200px;
     gap: 10px;
     align-content: end;
+    color: white;
 }
 
 #playlists-content {

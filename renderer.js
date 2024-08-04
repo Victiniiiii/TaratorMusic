@@ -223,6 +223,13 @@ document.getElementById('my-music').addEventListener('click', () => {
 
     ipcRenderer.send('get-music-files');
     ipcRenderer.once('music-files', (event, musicFiles) => {
+        if (fs.readdirSync(path.join(taratorFolder, 'musics')).length == 0) {
+            document.getElementById('my-music-content').innerHTML = "No songs? Use the download feature in the left, or add some mp3 files to the 'musics' folder."
+            document.getElementById('my-music-content').style.display = 'block';
+            return;
+        } else {
+            document.getElementById('my-music-content').style.display = 'grid';
+        }
         musicFiles.forEach(file => {
             const musicElement = createMusicElement(file);
             myMusicContent.appendChild(musicElement);
