@@ -778,13 +778,26 @@ function randomSongFunctionMainMenu() {
     let randomIndex = Math.floor(Math.random() * musicItems.length);
     if (currentPlayingElement) {
         console.log(musicItems[randomIndex].getAttribute('data-file-name'))
-        while (musicItems[randomIndex].getAttribute('data-file-name') === document.getElementById('song-name').innerText+".mp3") {
+        while (musicItems[randomIndex].getAttribute('data-file-name') === document.getElementById('song-name').innerText + ".mp3") {
             randomIndex = Math.floor(Math.random() * musicItems.length);
         }
     }    
     nextSongName = musicItems[randomIndex].getAttribute('data-file-name');
     const file = { name: nextSongName };
     playMusic(file, document.querySelector(`.music-item[data-file-name="${nextSongName}.mp3"]`), true);
+}
+
+function randomPlaylistFunctionMainMenu() { // TODO: Burada da tekrarlanmayı kapat
+    let allThePlaylists = Array.from(document.querySelectorAll('.playlist'));
+    let randomIndex = Math.floor(Math.random() * allThePlaylists.length);
+    let selectedPlaylist = allThePlaylists[randomIndex];
+    console.log("selectedPlaylist",selectedPlaylist)
+    const playlistSongs = document.querySelectorAll(`.playlist .playlistInfoandSongs .playlist-songs .playlist-song`); // YOU WERE HERE
+
+    // Example: Iterate over the selected elements and log their text content
+    playlistSongs.forEach(song => {
+    console.log(song.textContent);
+    });
 }
 
 let rememberautoplay = JSON.parse(localStorage.getItem('rememberautoplay')) || false;
