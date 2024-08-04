@@ -777,7 +777,6 @@ function randomSongFunctionMainMenu() {
     const musicItems = Array.from(document.querySelectorAll('.music-item'));
     let randomIndex = Math.floor(Math.random() * musicItems.length);
     if (currentPlayingElement) {
-        console.log(musicItems[randomIndex].getAttribute('data-file-name'))
         while (musicItems[randomIndex].getAttribute('data-file-name') === document.getElementById('song-name').innerText + ".mp3") {
             randomIndex = Math.floor(Math.random() * musicItems.length);
         }
@@ -787,24 +786,20 @@ function randomSongFunctionMainMenu() {
     playMusic(file, document.querySelector(`.music-item[data-file-name="${nextSongName}.mp3"]`), false);
 }
 
-function randomPlaylistFunctionMainMenu() {
+function randomPlaylistFunctionMainMenu() {    
     let allThePlaylists = Array.from(document.querySelectorAll('.playlist'));
     let randomIndex = Math.floor(Math.random() * allThePlaylists.length);    
     let selectedPlaylist = allThePlaylists[randomIndex];
 
-    let randomIndexForSong = Math.floor(Math.random() * allThePlaylists.length);
-    
-    
+    if (currentPlaylist) {
+        while (selectedPlaylist.getAttribute('data-playlist-name') == currentPlaylist.name) {
+            randomIndex = Math.floor(Math.random() * allThePlaylists.length);
+            selectedPlaylist = allThePlaylists[randomIndex];
+        }
+    }
+
     const playlistSongs = selectedPlaylist.querySelectorAll('.playlistInfoandSongs .playlist-songs .playlist-song');
-    //playlistSongs.forEach(song => {
-    //    console.log(song.textContent);
-    //});
-
-    console.log("selectedPlaylist", selectedPlaylist,"playlistSongs[0]",playlistSongs[0]); // if currentplaylist, if selectedplaylist == Currentplaylist
-
-    let zort = playlistSongs[0].innerText;
-    const file = { name: zort };
-    playMusic(file, playlistSongs[0], true);
+    playlistSongs[0].click();
 }
 
 let rememberautoplay = JSON.parse(localStorage.getItem('rememberautoplay')) || false;
