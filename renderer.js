@@ -1233,6 +1233,9 @@ function actuallyDownloadTheSong() {
             document.getElementById('downloadModalText').innerText = ('Invalid characters in filename. These characters cannot be used in filenames: / \\ : * ? " < > | ,');
             document.getElementById('finalDownloadButton').disabled = false;
             return;
+        } else if (secondInput.length > 100) {
+            document.getElementById('downloadModalText').innerText = ('Invalid filename. The file must be shorter than 100 characters.');
+            document.getElementById('finalDownloadButton').disabled = false;
         } else if (fileExists(outputFilePath)) {
             document.getElementById('downloadModalText').innerText = (`File ${secondInput}.mp3 already exists. Please choose a different filename.`);
             document.getElementById('finalDownloadButton').disabled = false;
@@ -1284,11 +1287,15 @@ function actuallyDownloadTheSong() {
         for (i = 1; i < playlistInitialSongCount; i++) {
             if (document.getElementById('playlistTitle' + i)) { 
                 if (!isValidFileName(document.getElementById('playlistTitle' + i).value)) {
-                    document.getElementById('downloadModalText').innerText = (`Invalid characters in ${i}. song's name. These characters cannot be used in filenames: / \\ : * ? " < > | ,`); 
+                    document.getElementById('downloadModalText').innerText = (`Invalid characters in ${i}. songs name. These characters cannot be used in filenames: / \\ : * ? " < > | ,`); 
+                    document.getElementById('finalDownloadButton').disabled = false;
+                    return;
+                } else if ((document.getElementById('playlistTitle' + i).value).length > 100) {
+                    document.getElementById('downloadModalText').innerText = (`${i}. songs name is too long. Maximum length allowed is 100 characters.`); 
                     document.getElementById('finalDownloadButton').disabled = false;
                     return;
                 } // TODO: FILE EXISTS !!!!
-                // VE BAŞKA Bİ ŞARKIYLA İSMİ AYNI MI DİYE DE BAKSIN !!!
+                // VE BAŞKA Bİ ŞARKIYLA İSMİ AYNI MI DİYE DE BAKSIN !!! ( Bu en başta )
                 theArrayThatIWillGiveToPython[i-1] = (document.getElementById('playlistTitle' + i).value.trim())
             } else {
                 theArrayThatIWillGiveToPython[i-1] = "None";
