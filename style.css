@@ -600,7 +600,7 @@ video, audio {
 #mainmenulogo {
     width: 20vw;
     height: 20vw;
-    background-image: url("../music/thumbnails/tarator1024_icon.png");
+    background-image: url("../TaratorMusic/thumbnails/tarator1024_icon.png");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;

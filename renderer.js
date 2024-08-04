@@ -6,7 +6,7 @@ const os = require('os');
 const fs = require('fs');
 const path = require('path');
 const { spawn } = require('child_process');
-const taratorFolder = path.join(require('os').homedir(), 'Desktop', 'music'); // TODO
+const taratorFolder = path.join(require('os').homedir(), 'Desktop', 'music', 'TaratorMusic'); // TODO
 
 let currentPlayingElement = null;
 let audioElement = null;
@@ -537,7 +537,7 @@ function saveEditPlaylist() {
     const newName = document.getElementById('editPlaylistNameInput').value;
     const newThumbnail = document.getElementById('editPlaylistThumbnail').src;
 
-    const filePath = path.join(__dirname, 'playlists.json');
+    const filePath = path.join(taratorFolder, 'playlists.json');
     fs.readFile(filePath, 'utf8', (err, data) => {
         if (err) {
             console.error('Error reading file:', err);
@@ -931,7 +931,7 @@ document.getElementById('customizeForm').addEventListener('submit', function(eve
     const oldThumbnailPath = document.getElementById('customizeForm').dataset.oldThumbnailPath.replace('.mp3', '');    
     const newSongName = document.getElementById('customizeSongName').value;
     const newThumbnailFile = document.getElementById('customizeThumbnail').files[0];    
-    const userDesktop = path.join(taratorFolder, 'musics');
+    const userDesktop = path.join(taratorFolder, 'musics'); // TODO: Confusing name
     const oldSongFilePath = path.join(userDesktop, oldSongName);    
     let newSongFilePath = path.join(userDesktop, newSongName + path.extname(oldSongName));
     
@@ -1009,14 +1009,14 @@ function checkNameThumbnail() {
     }
 
     if (differentiateYouTubeLinks(document.getElementById('downloadFirstInput').value) == 'video') {
-        const pythonProcessTitle = spawn('python', [ path.join(__dirname, 'pypy1.py'), document.getElementById('downloadFirstInput').value ]);
+        const pythonProcessTitle = spawn('python', [ path.join(taratorFolder, 'pypy1.py'), document.getElementById('downloadFirstInput').value ]);
         pythonProcessTitle.stdout.on('data', (data) => {
             const decodedData = data.toString().trim();
             let decodedString;
             try { decodedString = JSON.parse(decodedData); } 
             catch (error) { decodedString = decodedData; }
 
-            const pythonProcessThumbnail2 = spawn('python', [path.join(__dirname, 'pypy2.py'), document.getElementById('downloadFirstInput').value]);
+            const pythonProcessThumbnail2 = spawn('python', [path.join(taratorFolder, 'pypy2.py'), document.getElementById('downloadFirstInput').value]);
             pythonProcessThumbnail2.stdout.on('data', (data) => {                
                 const downloadPlaceofSongs = document.createElement('div');
                 document.getElementById('downloadSecondPhase').appendChild(downloadPlaceofSongs);
@@ -1067,7 +1067,7 @@ function checkNameThumbnail() {
         pythonProcessTitle.on('close', (code) => { console.log(`Python process exited with code ${code}`); });
 
     } else if (differentiateYouTubeLinks(document.getElementById('downloadFirstInput').value) == 'playlist') {
-        const pythonProcessTitle = spawn('python', [ path.join(__dirname, 'pypy3.py'), document.getElementById('downloadFirstInput').value ]);    
+        const pythonProcessTitle = spawn('python', [ path.join(taratorFolder, 'pypy3.py'), document.getElementById('downloadFirstInput').value ]);    
         pythonProcessTitle.stdout.on('data', (data) => {
             decodedData = data.toString().trim();
             
@@ -1075,7 +1075,7 @@ function checkNameThumbnail() {
             catch (error) { console.error('Error parsing JSON:', error); return; }
             if (decodedJson.error) { console.error('Python script error:', decodedJson.error); return; }
 
-            const pythonProcessThumbnail2 = spawn('python', [ path.join(__dirname, 'pypy4.py'), document.getElementById('downloadFirstInput').value ]);
+            const pythonProcessThumbnail2 = spawn('python', [ path.join(taratorFolder, 'pypy4.py'), document.getElementById('downloadFirstInput').value ]);
             pythonProcessThumbnail2.stdout.on('data', (data) => {
                 decodedData2 = data.toString().trim();
                 
@@ -1093,7 +1093,7 @@ function checkNameThumbnail() {
                 theInvisibleArray.className = 'invisible';
                 let pizza = 0;
 
-                const python3 = spawn('python', [ path.join(__dirname, 'pypy9.py'), document.getElementById('downloadFirstInput').value ]);
+                const python3 = spawn('python', [ path.join(taratorFolder, 'pypy9.py'), document.getElementById('downloadFirstInput').value ]);
                 python3.stdout.on('data', (data) => { 
                     let pypy9output = JSON.parse(data.toString().trim().replace(/'/g, '"'));
         
@@ -1211,7 +1211,7 @@ function actuallyDownloadTheSong() {
             document.getElementById('finalDownloadButton').disabled = false;
             return;
         } else { document.getElementById('downloadModalText').innerText = "Downloading Song..."}
-                const pythonProcessFileName = spawn('python', [ path.join(__dirname, 'pypy5.py'), document.getElementById('downloadFirstInput').value, secondInput ]);
+                const pythonProcessFileName = spawn('python', [ path.join(taratorFolder, 'pypy5.py'), document.getElementById('downloadFirstInput').value, secondInput ]);
                 pythonProcessFileName.stdout.on('data', (data) => {
                     const decodedData = data.toString().trim();
                     let parsedData;
@@ -1224,10 +1224,10 @@ function actuallyDownloadTheSong() {
                         const reader = new FileReader();
                         reader.onloadend = function() {
                             const base64data = reader.result;
-                            const tempFilePath = path.join(__dirname, 'temp_thumbnail.txt');
+                            const tempFilePath = path.join(taratorFolder, 'temp_thumbnail.txt');
                             fs.writeFileSync(tempFilePath, base64data);
 
-                            const pythonProcessFileThumbnail = spawn('python', [ path.join(__dirname, 'pypy6.py'), tempFilePath, secondInput ]);
+                            const pythonProcessFileThumbnail = spawn('python', [ path.join(taratorFolder, 'pypy6.py'), tempFilePath, secondInput ]);
                             pythonProcessFileThumbnail.stdout.on('data', (data) => {
                                 const decodedData = data.toString().trim();
                                 let parsedData;
@@ -1271,7 +1271,7 @@ function actuallyDownloadTheSong() {
         saveeeAsPlaylist(theArrayThatIWillGiveToPython);
         let howManyAreThere = document.querySelectorAll('div.songAndThumbnail').length;
 
-        const pythonProcessTitle = spawn('python', [ path.join(__dirname, 'pypy7.py'), theArrayThatIWillGiveToPython, document.getElementById('downloadFirstInput').value.trim()]);
+        const pythonProcessTitle = spawn('python', [ path.join(taratorFolder, 'pypy7.py'), theArrayThatIWillGiveToPython, document.getElementById('downloadFirstInput').value.trim()]);
         pythonProcessTitle.stdout.on('data', (data) => {
             document.getElementById('downloadModalText').innerText = data.toString().trim();
 
@@ -1289,10 +1289,10 @@ function actuallyDownloadTheSong() {
                             let reader = new FileReader();
                             reader.onloadend = function() {
                                 let base64data = reader.result;
-                                let tempFilePath = path.join(__dirname, `temp_thumbnail_${songName}.txt`);
+                                let tempFilePath = path.join(taratorFolder, `temp_thumbnail_${songName}.txt`);
                                 try {
                                     fs.writeFileSync(tempFilePath, base64data);
-                                    let pythonProcess = spawn('python', [path.join(__dirname, 'pypy6.py'), tempFilePath, songName]);
+                                    let pythonProcess = spawn('python', [path.join(taratorFolder, 'pypy6.py'), tempFilePath, songName]);
 
                                     pythonProcess.stdout.on('data', (data) => {
                                         let decodedData = data.toString().trim();
@@ -1361,7 +1361,7 @@ function removeSong() {
 
 function deletePlaylist() {
     const playlistName = document.getElementById('editInvisibleName').value;
-    const filePath = path.join(__dirname, 'playlists.json');
+    const filePath = path.join(taratorFolder, 'playlists.json');
     fs.readFile(filePath, 'utf8', (err, data) => {
         if (err) {
             console.error('Error reading file:', err);

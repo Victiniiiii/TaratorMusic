@@ -5,13 +5,14 @@ const { app, BrowserWindow, ipcMain, Menu } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const { spawn } = require('child_process');
+const taratorFolder = path.join(require('os').homedir(), 'Desktop', 'music', 'TaratorMusic'); // TODO
 
 function createWindow() {
     const mainWindow = new BrowserWindow({
         width: 1600,
         height: 850,
         title: "TaratorMusic",
-        icon: path.join(__dirname, 'thumbnails/tarator16_icon.png'),
+        icon: path.join(taratorFolder, 'thumbnails/tarator16_icon.png'),
         webPreferences: {
             contextIsolation: false,
             nodeIntegration: true,
@@ -37,8 +38,7 @@ app.on('window-all-closed', () => {
 });
 
 function readPlaylists(callback) {
-    const musicDirectory = path.join(require('os').homedir(), 'Desktop', 'music');
-    const playlistsFilePath = path.join(musicDirectory, 'playlists.json');
+    const playlistsFilePath = path.join(taratorFolder, 'playlists.json');
 
     fs.readFile(playlistsFilePath, 'utf8', (err, data) => {
         if (err) {
@@ -63,22 +63,21 @@ ipcMain.on('get-playlists', (event) => {
     });
 });
 
-ipcMain.handle('get-music-path', (event) => {
-    const desktopPath = app.getPath('desktop');
-    const musicFolderPath = path.join(desktopPath, 'music', 'musics');
+ipcMain.handle('get-music-path', (event) => { // Remove this part ?
+    const musicFolderPath = path.join(taratorFolder, 'musics');
     return musicFolderPath;
 });
 
 ipcMain.on('get-music-files', async (event) => {
 try {
     const desktopPath = app.getPath('desktop');
-    const musicFolderPath = path.join(desktopPath, 'music', 'musics');
+    const musicFolderPath = path.join(taratorFolder, 'musics');
     const files = await fs.promises.readdir(musicFolderPath);
     const musicFiles = files
         .filter(file => file.toLowerCase() !== 'desktop.ini') 
         .map(file => ({
             name: file,
-            thumbnail: `file://${path.join(desktopPath,"music","thumbnail", file,"_thumbnail")}`
+            thumbnail: `file://${path.join(taratorFolder,"thumbnail", file,"_thumbnail")}`
         }));
     event.reply('music-files', musicFiles);
     } catch (error) {
@@ -88,8 +87,7 @@ try {
 });
 
 ipcMain.on('add-to-playlist', (event, { playlistName, patates }) => {
-    const musicDirectory = path.join(app.getPath('desktop'), 'music');
-    const playlistsFilePath = path.join(musicDirectory, 'playlists.json');
+    const playlistsFilePath = path.join(taratorFolder, 'playlists.json');
 
     fs.readFile(playlistsFilePath, 'utf8', (err, data) => {
         if (err) {
@@ -137,9 +135,8 @@ ipcMain.on('add-to-playlist', (event, { playlistName, patates }) => {
 ipcMain.on('create-playlist', (event, playlistData) => {
     const { playlistName, useFirstSongThumbnail, thumbnailFilePath } = playlistData;
     
-    const musicDirectory = path.join(require('os').homedir(), 'Desktop', 'music');
-    const playlistsDirectory = path.join(musicDirectory, 'playlists');
-    const playlistsFilePath = path.join(musicDirectory, 'playlists.json');
+    const playlistsDirectory = path.join(taratorFolder, 'playlists');
+    const playlistsFilePath = path.join(taratorFolder, 'playlists.json');
 
     if (!fs.existsSync(playlistsDirectory)) {
         fs.mkdirSync(playlistsDirectory); // Burayı kaldır uygulama bitince
