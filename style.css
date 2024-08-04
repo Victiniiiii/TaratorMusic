@@ -668,3 +668,8 @@ input:checked + .slider {
 input:checked + .slider:before {
     transform: translateX(26px);
 }
+
+.numberingTheBoxes {
+    width: 30px;
+    height: 30px;
+}

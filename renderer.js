@@ -196,7 +196,7 @@ tabs.forEach(tab => {
     });
 });
 
-document.getElementById('my-music').addEventListener('click', () => {
+function myMusicOnClick(firsttime) {
     const myMusicContent = document.getElementById('my-music-content');
     myMusicContent.innerHTML = '';
 
@@ -223,7 +223,7 @@ document.getElementById('my-music').addEventListener('click', () => {
 
     ipcRenderer.send('get-music-files');
     ipcRenderer.once('music-files', (event, musicFiles) => {
-        if (fs.readdirSync(path.join(taratorFolder, 'musics')).length == 0) {
+        if (firsttime == 1) {} else if (fs.readdirSync(path.join(taratorFolder, 'musics')).length == 0) {
             document.getElementById('my-music-content').innerHTML = "No songs? Use the download feature in the left, or add some mp3 files to the 'musics' folder."
             document.getElementById('my-music-content').style.display = 'block';
             return;
@@ -246,7 +246,7 @@ document.getElementById('my-music').addEventListener('click', () => {
             }
         });
     });    
-});
+}
 
 function createMusicElement(file) {
     const musicElement = document.createElement('div');
@@ -777,7 +777,7 @@ function playNextSong() {
     }
 }
 
-function randomSongFunctionMainMenu() {
+function randomSongFunctionMainMenu() {    
     const musicItems = Array.from(document.querySelectorAll('.music-item'));
     let randomIndex = Math.floor(Math.random() * musicItems.length);
     if (currentPlayingElement) {
@@ -1169,6 +1169,11 @@ function checkNameThumbnail() {
                             deleteThisPlaylistSong.onclick = function() { this.parentNode.remove(); };
                         }                        
         
+                        const theDivsNumber = document.createElement('div');
+                        theDivsNumber.innerHTML = i;
+                        theDivsNumber.class = 'numberingTheBoxes';
+                        exampleDownloadColumn.appendChild(theDivsNumber);
+
                         const thumbnailInput = document.createElement('input');
                         thumbnailInput.type = 'file';
                         thumbnailInput.className = 'thumbnailInput';
@@ -1486,7 +1491,17 @@ function saveeeAsPlaylist(theArrayThatIWillGiveToPython) {
     }
 }
 
-document.getElementById('my-music').click();
+function hasDuplicates(array) {
+    const seen = new Set();
+    return array.filter(item => {
+      if (seen.has(item)) {
+        return true;
+      }
+      seen.add(item);
+      return false;
+    });
+}
+
 document.getElementById('playlists').click();
-document.getElementById('settings').click();
 document.getElementById('main-menu').click();
+myMusicOnClick(1);
