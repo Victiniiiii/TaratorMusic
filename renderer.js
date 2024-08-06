@@ -6,7 +6,7 @@ const os = require('os');
 const fs = require('fs');
 const path = require('path');
 const { spawn } = require('child_process');
-const taratorFolder = path.join(require('os').homedir(), 'Desktop', 'music', 'TaratorMusic'); // TODO
+const taratorFolder = path.join(require('os').homedir(), 'Desktop', 'music', 'TaratorMusic'); // TODO dirname
 
 let currentPlayingElement = null;
 let audioElement = null;
@@ -181,7 +181,8 @@ tabs.forEach(tab => {
                 document.getElementById('main-menu-content').style.display = 'none';
                 document.getElementById('my-music-content').style.display = 'none';                    
                 document.getElementById('playlists-content').style.display = 'none';
-                document.getElementById('settings-content').style.display = 'none'; // TODO: Switchlendiğinde scroll bar en tepeye gelsin
+                document.getElementById('settings-content').style.display = 'none';
+                window.scrollTo(0, 0);
                 if (content.id === "main-menu-content") {
                     document.getElementById('main-menu-content').style.display = 'flex';
                 } else if (content.id === "my-music-content") {
@@ -290,7 +291,7 @@ function createMusicElement(file) {
     const addToPlaylistButton = document.createElement('button');
     addToPlaylistButton.innerHTML = icon.addToPlaylist;
     addToPlaylistButton.classList.add('add-to-playlist-button');
-    addToPlaylistButton.addEventListener('click', () => { openAddToPlaylistModal(file.name); });
+    addToPlaylistButton.addEventListener('click', () => { openAddToPlaylistModal(songNameElement.innerHTML)});
 
     musicElement.appendChild(songLengthElement);
     musicElement.appendChild(songNameElement);
@@ -644,7 +645,7 @@ function openAddToPlaylistModal(songName) {
     document.getElementById('addToPlaylistModal').style.display = 'block';
     const playlistsContainer = document.getElementById('playlist-checkboxes');
     playlistsContainer.innerHTML = '';
-    patates = songName.slice(0,-4);
+    let mercimek = songName
 
     ipcRenderer.send('get-playlists');
     ipcRenderer.once('send-playlists', (event, playlists) => {
@@ -652,17 +653,29 @@ function openAddToPlaylistModal(songName) {
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
             checkbox.id = playlist.name;
-            checkbox.value = songName;  
+            checkbox.value = mercimek;  
+            console.log("playlist.name",playlist.name,"mercimek",mercimek)
+    
+            // Check if the song is in the playlist
+            if (playlist.songs.includes(mercimek)) {
+                checkbox.checked = true;
+            }
+    
             const label = document.createElement('label');
             label.textContent = playlist.name;
             label.htmlFor = checkbox.id; 
-
+    
             playlistsContainer.appendChild(checkbox);
             playlistsContainer.appendChild(label);
             playlistsContainer.appendChild(document.createElement('br'));
         });
-    }); 
-}
+    });
+    
+    
+} // first of all, it needs to check the boxs at the top function if its a part of the specified playlist. 
+//  secondly, give errors ( alerts ) if the user tries to add song to a playlist that already has it.
+// then, it should work with multiple playlist. perhaps add foreach at the top function
+// tik kaldırılırsa playlistten çıksın
 
 function addToSelectedPlaylists(patates) {
     const checkboxes = document.querySelectorAll('#playlist-checkboxes input[type="checkbox"]');
@@ -1467,10 +1480,9 @@ function saveeeAsPlaylist(theArrayThatIWillGiveToPython) {
 
             try {
                 let playlists = JSON.parse(data);
-
                 let newPlaylist = { // TODO: Check if same named playlist exists
                     name: document.getElementById('playlistTitle0').value,
-                    songs: theArrayThatIWillGiveToPython, // TODO: add .mp3 on top ya da diğerlerinden kaldır
+                    songs: theArrayThatIWillGiveToPython,
                     thumbnail: document.getElementById('thumbnailImage0').src // TODO: Save this to local
                 };
 
