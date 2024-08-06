@@ -1385,6 +1385,7 @@ function actuallyDownloadTheSong() {
             let j = 1;
 
             while (peynir < howManyAreThere) {
+                if (j == 5001) {break;}
                 if (document.getElementById(`thumbnailImage${j}`)) {
                     let img = document.getElementById(`thumbnailImage${j}`);
                     let songName = document.getElementById(`playlistTitle${j}`).value;
