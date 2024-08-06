@@ -1349,6 +1349,7 @@ function actuallyDownloadTheSong() {
             return;
         }
         for (i = 1; i < playlistInitialSongCount; i++) {
+            let outputFilePath = path.join(taratorFolder, 'musics', `${theArrayThatIWillGiveToPython[i]}.mp3`);
             if (document.getElementById('playlistTitle' + i)) { 
                 if (!isValidFileName(document.getElementById('playlistTitle' + i).value)) {
                     document.getElementById('downloadModalText').innerText = (`Invalid characters in ${i}. songs name. These characters cannot be used in filenames: / \\ : * ? " < > | ,`); 
@@ -1358,11 +1359,18 @@ function actuallyDownloadTheSong() {
                     document.getElementById('downloadModalText').innerText = (`${i}. songs name is too long. Maximum length allowed is 100 characters.`); 
                     document.getElementById('finalDownloadButton').disabled = false;
                     return;
-                } // TODO: FILE EXISTS !!!!
-                // VE BAŞKA Bİ ŞARKIYLA İSMİ AYNI MI DİYE DE BAKSIN !!! ( Bu en başta )
+                } else if (fileExists(outputFilePath)) {
+                    document.getElementById('downloadModalText').innerText = (`File ${theArrayThatIWillGiveToPython[i]}.mp3 already exists. Please choose a different filename.`);
+                    document.getElementById('finalDownloadButton').disabled = false;
+                    return;
+                } else if (hasDuplicates(theArrayThatIWillGiveToPython)) {
+                    document.getElementById('downloadModalText').innerText = (`The file names have duplicate names. Please choose different filenames.`);
+                    document.getElementById('finalDownloadButton').disabled = false;
+                    return;
+                }
                 theArrayThatIWillGiveToPython[i-1] = (document.getElementById('playlistTitle' + i).value.trim())
             } else {
-                theArrayThatIWillGiveToPython[i-1] = "None";
+                theArrayThatIWillGiveToPython[i-1] = "None"; // TODO
             }
         }
 
@@ -1527,21 +1535,18 @@ function saveeeAsPlaylist(theArrayThatIWillGiveToPython) {
                 const playlistName = document.getElementById('playlistTitle0').value;
                 const thumbnailSrc = document.getElementById('thumbnailImage0').src;
 
-                // Check if playlist with the same name exists
                 const playlistExists = playlists.some(playlist => playlist.name === playlistName);
                 if (playlistExists) {
                     console.error('A playlist with this name already exists.');
                     return;
                 }
 
-                // Prepare the new playlist
                 let newPlaylist = {
                     name: playlistName,
                     songs: theArrayThatIWillGiveToPython,
                     thumbnail: path.join(thumbnailDir, `${playlistName}_thumbnail.jpg`)
                 };
 
-                // Save thumbnail image locally
                 const thumbnailFilePath = path.join(thumbnailDir, `${playlistName}_thumbnail.jpg`);
                 axios({
                     url: thumbnailSrc,
@@ -1554,7 +1559,6 @@ function saveeeAsPlaylist(theArrayThatIWillGiveToPython) {
                     console.error('Error downloading the thumbnail image:', err);
                 });
 
-                // Add the new playlist to the array
                 playlists.push(newPlaylist);
                 let updatedJsonData = JSON.stringify(playlists, null, 2);
 
