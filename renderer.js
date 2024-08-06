@@ -2,11 +2,11 @@
 
 const { ipcRenderer } = require('electron');
 const icon = require('./svg.ts');
-const os = require('os');
 const fs = require('fs');
 const path = require('path');
 const { spawn } = require('child_process');
-const taratorFolder = path.join(require('os').homedir(), 'Desktop', 'music', 'TaratorMusic'); // TODO dirname
+const axios = require('axios');
+const taratorFolder = __dirname;
 
 let currentPlayingElement = null;
 let audioElement = null;
@@ -654,9 +654,7 @@ function openAddToPlaylistModal(songName) {
             checkbox.type = 'checkbox';
             checkbox.id = playlist.name;
             checkbox.value = mercimek;  
-            console.log("playlist.name",playlist.name,"mercimek",mercimek)
     
-            // Check if the song is in the playlist
             if (playlist.songs.includes(mercimek)) {
                 checkbox.checked = true;
             }
@@ -669,21 +667,65 @@ function openAddToPlaylistModal(songName) {
             playlistsContainer.appendChild(label);
             playlistsContainer.appendChild(document.createElement('br'));
         });
-    });
-    
-    
-} // first of all, it needs to check the boxs at the top function if its a part of the specified playlist. 
-//  secondly, give errors ( alerts ) if the user tries to add song to a playlist that already has it.
-// then, it should work with multiple playlist. perhaps add foreach at the top function
-// tik kaldırılırsa playlistten çıksın
+        const button = document.createElement('button');
+        button.id = 'addToPlaylistDone';
+        button.textContent = 'Done';
+        button.onclick = function() { addToSelectedPlaylists(mercimek);
+            console.log("mercimek",mercimek)
+         };
+        playlistsContainer.appendChild(button);
+    });    
+}
 
-function addToSelectedPlaylists(patates) {
+function addToSelectedPlaylists(mercimek) {
+    let hamburger = mercimek;
     const checkboxes = document.querySelectorAll('#playlist-checkboxes input[type="checkbox"]');
     const selectedPlaylists = Array.from(checkboxes)
         .filter(checkbox => checkbox.checked)
         .map(checkbox => checkbox.id);  
 
-    selectedPlaylists.forEach(playlistName => { ipcRenderer.send('add-to-playlist', { playlistName, patates }); });
+    fs.readFile(path.join(taratorFolder, 'playlists.json'), 'utf8', (err, data) => {
+        if (err) {
+            console.error('Error reading playlists file:', err);
+            return;
+        }
+
+        let playlists = [];
+        try {
+            playlists = JSON.parse(data);
+        } catch (parseErr) {
+            console.error('Error parsing playlists file:', parseErr);
+            return;
+        }
+
+        playlists.forEach(playlist => {
+            const playlistName = playlist.name;
+            const isSelected = selectedPlaylists.includes(playlistName);
+
+            if (isSelected) {
+                if (!playlist.songs.includes(hamburger)) {
+                    playlist.songs.push(hamburger);
+                    console.log(`Song '${hamburger}' added to playlist '${playlistName}'.`);
+                } else {
+                    console.log(`Song '${hamburger}' already exists in playlist '${playlistName}'.`);
+                }
+            } else {
+                const songIndex = playlist.songs.indexOf(hamburger);
+                if (songIndex !== -1) {
+                    playlist.songs.splice(songIndex, 1);
+                    console.log(`Song '${hamburger}' removed from playlist '${playlistName}'.`);
+                }
+            }
+        });
+
+        fs.writeFile(path.join(taratorFolder, 'playlists.json'), JSON.stringify(playlists, null, 2), (writeErr) => {
+            if (writeErr) {
+                console.error('Error updating playlists file:', writeErr);
+                return;
+            }
+            console.log('Playlists updated successfully.');
+        });
+    });    
     closeModal();
 }
 
@@ -973,7 +1015,7 @@ document.getElementById('customizeForm').addEventListener('submit', function(eve
     const oldThumbnailPath = document.getElementById('customizeForm').dataset.oldThumbnailPath.replace('.mp3', '');    
     const newSongName = document.getElementById('customizeSongName').value;
     const newThumbnailFile = document.getElementById('customizeThumbnail').files[0];    
-    const userDesktop = path.join(taratorFolder, 'musics'); // TODO: Confusing name bunların hepsini al tepeye koy
+    const userDesktop = path.join(taratorFolder, 'musics');
     const oldSongFilePath = path.join(userDesktop, oldSongName);    
     let newSongFilePath = path.join(userDesktop, newSongName + path.extname(oldSongName));
     
@@ -1016,7 +1058,7 @@ document.getElementById('customizeForm').addEventListener('submit', function(eve
             for (let i = 0; i < playlist.songs.length; i++) {
                 console.log(playlist.songs[i])
                 if (playlist.songs[i] == oldSongName.slice(0,-4)) {                    
-                    playlist.songs[i] = newSongName+".mp3";
+                    playlist.songs[i] = newSongName;
                 }
             }
         }
@@ -1472,6 +1514,8 @@ function differentiateYouTubeLinks(url) {
 function saveeeAsPlaylist(theArrayThatIWillGiveToPython) {
     if (isSaveAsPlaylistActive) {
         const jsonFilePath = path.join(taratorFolder, 'playlists.json');
+        const thumbnailDir = path.join(taratorFolder, 'thumbnails');
+
         fs.readFile(jsonFilePath, 'utf8', (err, data) => {
             if (err) {
                 console.error('Error reading the JSON file:', err);
@@ -1480,12 +1524,37 @@ function saveeeAsPlaylist(theArrayThatIWillGiveToPython) {
 
             try {
                 let playlists = JSON.parse(data);
-                let newPlaylist = { // TODO: Check if same named playlist exists
-                    name: document.getElementById('playlistTitle0').value,
+                const playlistName = document.getElementById('playlistTitle0').value;
+                const thumbnailSrc = document.getElementById('thumbnailImage0').src;
+
+                // Check if playlist with the same name exists
+                const playlistExists = playlists.some(playlist => playlist.name === playlistName);
+                if (playlistExists) {
+                    console.error('A playlist with this name already exists.');
+                    return;
+                }
+
+                // Prepare the new playlist
+                let newPlaylist = {
+                    name: playlistName,
                     songs: theArrayThatIWillGiveToPython,
-                    thumbnail: document.getElementById('thumbnailImage0').src // TODO: Save this to local
+                    thumbnail: path.join(thumbnailDir, `${playlistName}_thumbnail.jpg`)
                 };
 
+                // Save thumbnail image locally
+                const thumbnailFilePath = path.join(thumbnailDir, `${playlistName}_thumbnail.jpg`);
+                axios({
+                    url: thumbnailSrc,
+                    responseType: 'stream'
+                })
+                .then(response => {
+                    response.data.pipe(fs.createWriteStream(thumbnailFilePath));
+                })
+                .catch(err => {
+                    console.error('Error downloading the thumbnail image:', err);
+                });
+
+                // Add the new playlist to the array
                 playlists.push(newPlaylist);
                 let updatedJsonData = JSON.stringify(playlists, null, 2);
 
@@ -1496,6 +1565,7 @@ function saveeeAsPlaylist(theArrayThatIWillGiveToPython) {
                     }
                     console.log('New playlist added successfully!');
                 });
+
             } catch (parseError) {
                 console.error('Error parsing the JSON data:', parseError);
             }

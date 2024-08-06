@@ -37,7 +37,7 @@ app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') app.quit();
 });
 
-function readPlaylists(callback) {
+function readPlaylists(callback) { // merge this one and the bottom function ? 
     const playlistsFilePath = path.join(taratorFolder, 'playlists.json');
 
     fs.readFile(playlistsFilePath, 'utf8', (err, data) => {
@@ -86,8 +86,9 @@ try {
     }
 });
 
-ipcMain.on('add-to-playlist', (event, { playlistName, patates }) => {
+/*ipcMain.on('add-to-playlist', (event, { playlistName, hamburger }) => {
     const playlistsFilePath = path.join(taratorFolder, 'playlists.json');
+    let sucuk = hamburger
 
     fs.readFile(playlistsFilePath, 'utf8', (err, data) => {
         if (err) {
@@ -107,11 +108,11 @@ ipcMain.on('add-to-playlist', (event, { playlistName, patates }) => {
 
         const playlistIndex = playlists.findIndex(p => p.name === playlistName);
         if (playlistIndex !== -1) {
-            if (!playlists[playlistIndex].songs.includes(patates)) {
-                playlists[playlistIndex].songs.push(patates);
+            if (!playlists[playlistIndex].songs.includes(sucuk)) {
+                playlists[playlistIndex].songs.push(sucuk);
             } else {
-                console.log(`Song '${patates}' already exists in playlist '${playlistName}'.`);
-                event.reply('add-to-playlist-success', `Song '${patates}' already exists in playlist '${playlistName}'.`);
+                console.log(`Song '${sucuk}' already exists in playlist '${playlistName}'.`);
+                event.reply('add-to-playlist-success', `Song '${sucuk}' already exists in playlist '${playlistName}'.`);
                 return;
             }
         } else {
@@ -126,11 +127,11 @@ ipcMain.on('add-to-playlist', (event, { playlistName, patates }) => {
                 event.reply('add-to-playlist-error', 'Failed to update playlists file.');
                 return;
             }
-            console.log(`Song '${patates}' added to playlist '${playlistName}'.`);
-            event.reply('add-to-playlist-success', `Song '${patates}' added to playlist '${playlistName}'.`);
+            console.log(`Song '${sucuk}' added to playlist '${playlistName}'.`);
+            event.reply('add-to-playlist-success', `Song '${sucuk}' added to playlist '${playlistName}'.`);
         });
     });
-});
+}); */
 
 ipcMain.on('create-playlist', (event, playlistData) => {
     const { playlistName, thumbnailFilePath } = playlistData;    
