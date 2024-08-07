@@ -1342,41 +1342,48 @@ function actuallyDownloadTheSong() {
 
     } else if (differentiateYouTubeLinks(document.getElementById('downloadFirstInput').value) == 'playlist') {        
         let playlistInitialSongCount = document.getElementById('theInvisibleArray').innerText;
+        let howManyAreThere = document.querySelectorAll('div.songAndThumbnail').length;
+        const playlistTitlesArray = Array.from(document.querySelectorAll('input.playlistTitle'), input => input.value);
         let theArrayThatIWillGiveToPython = [];
         if (!isValidFileName(document.getElementById('playlistTitle0').value)) {
             document.getElementById('downloadModalText').innerText = (`Invalid characters in the playlist name. These characters cannot be used in filenames: / \\ : * ? " < > | ,`); 
             document.getElementById('finalDownloadButton').disabled = false;
             return;
         }
-        for (i = 1; i < playlistInitialSongCount; i++) {
-            let outputFilePath = path.join(taratorFolder, 'musics', `${theArrayThatIWillGiveToPython[i]}.mp3`);
-            if (document.getElementById('playlistTitle' + i)) { 
-                if (!isValidFileName(document.getElementById('playlistTitle' + i).value)) {
-                    document.getElementById('downloadModalText').innerText = (`Invalid characters in ${i}. songs name. These characters cannot be used in filenames: / \\ : * ? " < > | ,`); 
-                    document.getElementById('finalDownloadButton').disabled = false;
-                    return;
-                } else if ((document.getElementById('playlistTitle' + i).value).length > 100) {
-                    document.getElementById('downloadModalText').innerText = (`${i}. songs name is too long. Maximum length allowed is 100 characters.`); 
-                    document.getElementById('finalDownloadButton').disabled = false;
-                    return;
-                } else if (fileExists(outputFilePath)) {
-                    document.getElementById('downloadModalText').innerText = (`File ${theArrayThatIWillGiveToPython[i]}.mp3 already exists. Please choose a different filename.`);
-                    document.getElementById('finalDownloadButton').disabled = false;
-                    return;
-                } else if (hasDuplicates(theArrayThatIWillGiveToPython)) {
-                    document.getElementById('downloadModalText').innerText = (`The file names have duplicate names. Please choose different filenames.`);
-                    document.getElementById('finalDownloadButton').disabled = false;
-                    return;
+
+        let tavuk = 1;
+        let barbeku = 1;
+
+        while (tavuk < howManyAreThere) {
+            if (barbeku == 5001) {break;}
+            if (document.getElementById(`playlistTitle${barbeku}`)) {                
+                let outputFilePath = path.join(taratorFolder, 'musics', `${playlistTitlesArray[tavuk]}.mp3`);                
+                if (document.getElementById('playlistTitle' + barbeku)) { 
+                    if (!isValidFileName(document.getElementById('playlistTitle' + barbeku).value)) {
+                        document.getElementById('downloadModalText').innerText = (`Invalid characters in ${barbeku}. songs name. These characters cannot be used in filenames: / \\ : * ? " < > | ,`); 
+                        document.getElementById('finalDownloadButton').disabled = false;
+                        return;
+                    } else if ((document.getElementById('playlistTitle' + barbeku).value).length > 100) {
+                        document.getElementById('downloadModalText').innerText = (`${barbeku}. songs name is too long. Maximum length allowed is 100 characters.`); 
+                        document.getElementById('finalDownloadButton').disabled = false;
+                        return;
+                    } else if (fileExists(outputFilePath)) {
+                        document.getElementById('downloadModalText').innerText = (`File ${playlistTitlesArray[tavuk]}.mp3 already exists. Please choose a different filename.`);
+                        document.getElementById('finalDownloadButton').disabled = false;
+                        return;
+                    } else if (hasDuplicates(playlistTitlesArray)) {
+                        document.getElementById('downloadModalText').innerText = (`The file names have duplicate names. Please choose different filenames.`);
+                        document.getElementById('finalDownloadButton').disabled = false;
+                        return;
+                    }
+                    theArrayThatIWillGiveToPython[tavuk] = (document.getElementById('playlistTitle' + barbeku).value.trim())
                 }
-                theArrayThatIWillGiveToPython[i-1] = (document.getElementById('playlistTitle' + i).value.trim())
-            } else {
-                theArrayThatIWillGiveToPython[i-1] = "None"; // TODO
+                tavuk++;
             }
+            barbeku++
         }
 
         saveeeAsPlaylist(theArrayThatIWillGiveToPython);
-        let howManyAreThere = document.querySelectorAll('div.songAndThumbnail').length;
-
         const pythonProcessTitle = spawn('python', [ path.join(taratorFolder, 'pypy7.py'), theArrayThatIWillGiveToPython, document.getElementById('downloadFirstInput').value.trim()]);
         pythonProcessTitle.stdout.on('data', (data) => {
             document.getElementById('downloadModalText').innerText = data.toString().trim();
@@ -1580,13 +1587,13 @@ function saveeeAsPlaylist(theArrayThatIWillGiveToPython) {
 
 function hasDuplicates(array) {
     const seen = new Set();
-    return array.filter(item => {
-      if (seen.has(item)) {
-        return true;
-      }
-      seen.add(item);
-      return false;
-    });
+    for (const item of array) {
+        if (seen.has(item)) {
+            return true;
+        }
+        seen.add(item);
+    }
+    return false;
 }
 
 document.getElementById('playlists').click();
