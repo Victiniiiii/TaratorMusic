@@ -42,17 +42,12 @@ function changeThePreviousSongAmount() {
     document.getElementById('arrayLength').value = maximumPreviousSongCount;
 }
 
+/* // not working
 let pytubeApiTest = JSON.parse(localStorage.getItem('pytubeApiTest'));
-let discordApi = JSON.parse(localStorage.getItem('discordApi'));
 
 if (pytubeApiTest === null) { 
     pytubeApiTest = true;
     localStorage.setItem('pytubeApiTest', JSON.stringify(pytubeApiTest));
-}
-
-if (discordApi === null) { 
-    discordApi = true;
-    localStorage.setItem('discordApi', JSON.stringify(discordApi));
 }
 
 function togglePytubeTest() {
@@ -61,38 +56,60 @@ function togglePytubeTest() {
     pytubeTesting();
 }
 
+document.getElementById("toggleSwitchPytube").checked = pytubeApiTest;
+
+
+function pytubeTesting() {
+    if (pytubeApiTest) {
+        const pythonProcessFileName = spawn('python', [ path.join(taratorFolder, 'pypy5.py'), "https://www.youtube.com/watch?v=cdwal5Kw3Fc", "pytubetest" ]);
+        pythonProcessFileName.stdout.on('data', (data) => {
+            const decodedData = data.toString().trim();
+            let parsedData = '';
+            try { 
+                parsedData = JSON.parse(decodedData); 
+            } catch (error) { 
+                console.error(`Error parsing JSON: ${error}`); 
+                parsedData = { error: 'Invalid JSON' }; 
+            } 
+            
+            // Ensure parsedData is a string or convert it to string
+            const statusMessage = typeof parsedData === 'string' ? parsedData : JSON.stringify(parsedData);
+            console.log(statusMessage)
+            
+            if (!statusMessage.toLowerCase().includes("error")) {
+                document.getElementById('mainmenupytubeapi').innerHTML = "Pytube API Status: Online";
+                document.getElementById('mainmenupytubeapi').style.color = 'green';
+            } else {
+                document.getElementById('mainmenupytubeapi').innerHTML = "Pytube API Status: Down";
+                document.getElementById('mainmenupytubeapi').style.color = 'red';
+            }
+        });
+    } else {
+        document.getElementById('mainmenupytubeapi').innerHTML = "Pytube API Testing: Disabled";
+        document.getElementById('mainmenupytubeapi').style.color = 'yellow';
+    }
+}
+
+pytubeTesting();
+*/
+
+document.getElementById('mainmenupytubeapi').innerHTML = "Pytube API Status: Coming Soon";
+document.getElementById('mainmenupytubeapi').style.color = 'blue';
+
+let discordApi = JSON.parse(localStorage.getItem('discordApi'));
+
+if (discordApi === null) { 
+    discordApi = true;
+    localStorage.setItem('discordApi', JSON.stringify(discordApi));
+}
+
 function toggleDiscordAPI() {
     discordApi = !discordApi;
     localStorage.setItem("discordApi", JSON.stringify(discordApi));
     updateDiscordPresence();
 }
 
-document.getElementById("toggleSwitchPytube").checked = pytubeApiTest;
 document.getElementById("toggleSwitchDiscord").checked = discordApi;
-
-function pytubeTesting() {
-    if (pytubeApiTest == true) {
-        const pythonProcess = spawn('python', ['test.py']);
-        let scriptOutput = '';
-
-        pythonProcess.stdout.on('data', (data) => { scriptOutput += data.toString(); });
-        pythonProcess.stderr.on('data', (data) => { scriptOutput += data.toString(); });
-        pythonProcess.on('close', () => {
-            if (!scriptOutput.toLowerCase().includes("error")) {
-                document.getElementById('mainmenupytubeapi').innerHTML = "Pytube API Status: Online"
-                document.getElementById('mainmenupytubeapi').style.color = 'green';
-            } else {
-                document.getElementById('mainmenupytubeapi').innerHTML = "Pytube API Status: Down"
-                document.getElementById('mainmenupytubeapi').style.color = 'red';
-            }
-        });
-    } else {
-        document.getElementById('mainmenupytubeapi').innerHTML = "Pytube API Testing: Disabled"
-        document.getElementById('mainmenupytubeapi').style.color = 'yellow';
-    }
-}
-
-pytubeTesting();
 
 const clientId = '1258898699816275969'; // not a private key, just the ID of my app
 const DiscordRPC = require('discord-rpc');
@@ -1274,7 +1291,7 @@ function checkNameThumbnail() {
 }
 
 function isValidFileName(fileName) {
-    const invalidChars = /[\\/:"*?<>|,]/; 
+    const invalidChars = /[\\/:"*?<>|'.,]/; 
     return !invalidChars.test(fileName);
 }
 
@@ -1346,7 +1363,7 @@ function actuallyDownloadTheSong() {
         const playlistTitlesArray = Array.from(document.querySelectorAll('input.playlistTitle'), input => input.value);
         let theArrayThatIWillGiveToPython = [];
         if (!isValidFileName(document.getElementById('playlistTitle0').value)) {
-            document.getElementById('downloadModalText').innerText = (`Invalid characters in the playlist name. These characters cannot be used in filenames: / \\ : * ? " < > | ,`); 
+            document.getElementById('downloadModalText').innerText = (`Invalid characters in the playlist name. These characters cannot be used in filenames: / \\ ' : * ? " < > | ,`); 
             document.getElementById('finalDownloadButton').disabled = false;
             return;
         }
@@ -1359,8 +1376,9 @@ function actuallyDownloadTheSong() {
             if (document.getElementById(`playlistTitle${barbeku}`)) {                
                 let outputFilePath = path.join(taratorFolder, 'musics', `${playlistTitlesArray[tavuk]}.mp3`);                
                 if (document.getElementById('playlistTitle' + barbeku)) { 
+                    const duplicates = findDuplicates(playlistTitlesArray);
                     if (!isValidFileName(document.getElementById('playlistTitle' + barbeku).value)) {
-                        document.getElementById('downloadModalText').innerText = (`Invalid characters in ${barbeku}. songs name. These characters cannot be used in filenames: / \\ : * ? " < > | ,`); 
+                        document.getElementById('downloadModalText').innerText = (`Invalid characters in ${barbeku}. songs name. These characters cannot be used in filenames: / \\ ' : * ? " < > | ,`); 
                         document.getElementById('finalDownloadButton').disabled = false;
                         return;
                     } else if ((document.getElementById('playlistTitle' + barbeku).value).length > 100) {
@@ -1371,8 +1389,8 @@ function actuallyDownloadTheSong() {
                         document.getElementById('downloadModalText').innerText = (`File ${playlistTitlesArray[tavuk]}.mp3 already exists. Please choose a different filename.`);
                         document.getElementById('finalDownloadButton').disabled = false;
                         return;
-                    } else if (hasDuplicates(playlistTitlesArray)) {
-                        document.getElementById('downloadModalText').innerText = (`The file names have duplicate names. Please choose different filenames.`);
+                    } else if (duplicates.length > 0) {
+                        document.getElementById('downloadModalText').innerText = `The following file names have duplicates: ${duplicates.join(', ')}. Please choose different filenames.`;
                         document.getElementById('finalDownloadButton').disabled = false;
                         return;
                     }
@@ -1383,6 +1401,7 @@ function actuallyDownloadTheSong() {
             barbeku++
         }
 
+        console.log(theArrayThatIWillGiveToPython);
         saveeeAsPlaylist(theArrayThatIWillGiveToPython);
         const pythonProcessTitle = spawn('python', [ path.join(taratorFolder, 'pypy7.py'), theArrayThatIWillGiveToPython, document.getElementById('downloadFirstInput').value.trim()]);
         pythonProcessTitle.stdout.on('data', (data) => {
@@ -1585,15 +1604,18 @@ function saveeeAsPlaylist(theArrayThatIWillGiveToPython) {
     }
 }
 
-function hasDuplicates(array) {
+function findDuplicates(array) {
     const seen = new Set();
+    const duplicates = new Set();
+
     for (const item of array) {
         if (seen.has(item)) {
-            return true;
+            duplicates.add(item);
         }
         seen.add(item);
     }
-    return false;
+
+    return Array.from(duplicates);
 }
 
 document.getElementById('playlists').click();
