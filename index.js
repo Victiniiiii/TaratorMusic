@@ -5,7 +5,7 @@ const { app, BrowserWindow, ipcMain, Menu } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const { spawn } = require('child_process');
-const taratorFolder = path.join(require('os').homedir(), 'Desktop', 'music', 'TaratorMusic'); // TODO
+const taratorFolder = __dirname;
 
 function createWindow() {
     const mainWindow = new BrowserWindow({
@@ -85,53 +85,6 @@ try {
     event.reply('music-files', []);
     }
 });
-
-/*ipcMain.on('add-to-playlist', (event, { playlistName, hamburger }) => {
-    const playlistsFilePath = path.join(taratorFolder, 'playlists.json');
-    let sucuk = hamburger
-
-    fs.readFile(playlistsFilePath, 'utf8', (err, data) => {
-        if (err) {
-            console.error('Error reading playlists file:', err);
-            event.reply('add-to-playlist-error', 'Failed to read playlists file.');
-            return;
-        }
-
-        let playlists = [];
-        try {
-            playlists = JSON.parse(data);
-        } catch (parseErr) {
-            console.error('Error parsing playlists file:', parseErr);
-            event.reply('add-to-playlist-error', 'Failed to parse playlists file.');
-            return;
-        }
-
-        const playlistIndex = playlists.findIndex(p => p.name === playlistName);
-        if (playlistIndex !== -1) {
-            if (!playlists[playlistIndex].songs.includes(sucuk)) {
-                playlists[playlistIndex].songs.push(sucuk);
-            } else {
-                console.log(`Song '${sucuk}' already exists in playlist '${playlistName}'.`);
-                event.reply('add-to-playlist-success', `Song '${sucuk}' already exists in playlist '${playlistName}'.`);
-                return;
-            }
-        } else {
-            console.error('Playlist not found:', playlistName);
-            event.reply('add-to-playlist-error', 'Playlist not found.');
-            return;
-        }
-
-        fs.writeFile(playlistsFilePath, JSON.stringify(playlists, null, 2), (writeErr) => {
-            if (writeErr) {
-                console.error('Error updating playlists file:', writeErr);
-                event.reply('add-to-playlist-error', 'Failed to update playlists file.');
-                return;
-            }
-            console.log(`Song '${sucuk}' added to playlist '${playlistName}'.`);
-            event.reply('add-to-playlist-success', `Song '${sucuk}' added to playlist '${playlistName}'.`);
-        });
-    });
-}); */
 
 ipcMain.on('create-playlist', (event, playlistData) => {
     const { playlistName, thumbnailFilePath } = playlistData;    
