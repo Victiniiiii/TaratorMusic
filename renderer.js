@@ -72,7 +72,6 @@ function pytubeTesting() {
                 parsedData = { error: 'Invalid JSON' }; 
             } 
             
-            // Ensure parsedData is a string or convert it to string
             const statusMessage = typeof parsedData === 'string' ? parsedData : JSON.stringify(parsedData);
             console.log(statusMessage)
             
@@ -94,7 +93,7 @@ pytubeTesting();
 */
 
 document.getElementById('mainmenupytubeapi').innerHTML = "Pytube API Status: Coming Soon";
-document.getElementById('mainmenupytubeapi').style.color = 'blue';
+document.getElementById('mainmenupytubeapi').style.color = 'orange';
 
 let discordApi = JSON.parse(localStorage.getItem('discordApi'));
 
@@ -1394,7 +1393,7 @@ function actuallyDownloadTheSong() {
                         document.getElementById('finalDownloadButton').disabled = false;
                         return;
                     }
-                    theArrayThatIWillGiveToPython[tavuk] = (document.getElementById('playlistTitle' + barbeku).value.trim())
+                    theArrayThatIWillGiveToPython[tavuk - 1] = (document.getElementById('playlistTitle' + barbeku).value.trim())
                 }
                 tavuk++;
             }
@@ -1403,6 +1402,7 @@ function actuallyDownloadTheSong() {
 
         console.log(theArrayThatIWillGiveToPython);
         saveeeAsPlaylist(theArrayThatIWillGiveToPython);
+        document.getElementById('downloadModalText').innerText = "Downloading...";
         const pythonProcessTitle = spawn('python', [ path.join(taratorFolder, 'pypy7.py'), theArrayThatIWillGiveToPython, document.getElementById('downloadFirstInput').value.trim()]);
         pythonProcessTitle.stdout.on('data', (data) => {
             document.getElementById('downloadModalText').innerText = data.toString().trim();
