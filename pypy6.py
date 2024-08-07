@@ -8,7 +8,7 @@ if len(sys.argv) > 2:
         temp_file_path = sys.argv[1]
         download_second_input_value = sys.argv[2]
 
-        output_dir = os.path.join(os.path.expanduser("~"), "Desktop", "music", "thumbnails")
+        output_dir = os.path.join(os.path.dirname(__file__), 'thumbnails')
         os.makedirs(output_dir, exist_ok=True)
         new_file_name = f"{download_second_input_value}_thumbnail.jpg"
         new_file_path = os.path.join(output_dir, new_file_name)

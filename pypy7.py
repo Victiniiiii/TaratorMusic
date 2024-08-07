@@ -7,7 +7,7 @@ if len(sys.argv) > 2:
     try:
         video_titles = sys.argv[1]
         playlist_url = sys.argv[2]    
-        output_directory = os.path.join(os.path.expanduser("~"), "Desktop", "music", "musics")
+        output_directory = os.path.join(os.path.dirname(__file__), 'musics')
 
         titles_to_download = video_titles.split(',')
         playlist = Playlist(playlist_url)

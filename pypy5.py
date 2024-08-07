@@ -11,7 +11,7 @@ if len(sys.argv) > 2:
         yt = YouTube(youtube_url)
         title = yt.title
 
-        output_directory = os.path.expanduser("~/Desktop/music/musics")
+        output_directory = os.path.join(os.path.dirname(__file__), 'musics')
         yt.streams.filter(only_audio=True).first().download(output_path=output_directory, filename=f"{filename}.mp3")
         print(json.dumps({"message": f"Downloaded {filename} successfully!", "title": title}))
         
