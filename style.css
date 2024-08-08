@@ -587,6 +587,9 @@ video, audio {
 #downloadModalText {
     width: 73vw;
     height: 5vh;
+    display: flex;
+    justify-content: start;
+    align-items: center;
 }
 
 #finalDownloadButton {

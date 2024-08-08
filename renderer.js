@@ -1091,6 +1091,10 @@ document.getElementById('customizeForm').addEventListener('submit', function(eve
 function checkNameThumbnail() {
     document.getElementById('downloadFirstButton').disabled = true;
 
+    if (document.getElementById('downloadSecondPhase')) {
+        document.getElementById('downloadSecondPhase').remove();
+    }
+
     const downloadSecondPhase = document.createElement('div');     
     downloadSecondPhase.id = 'downloadSecondPhase';
     document.getElementById('downloadModalContent').appendChild(downloadSecondPhase);
