@@ -1357,14 +1357,17 @@ function actuallyDownloadTheSong() {
         pythonProcessFileName.on('close', (code) => { console.log(`Python process exited with code ${code}`); });
 
     } else if (differentiateYouTubeLinks(document.getElementById('downloadFirstInput').value) == 'playlist') {        
-        let playlistInitialSongCount = document.getElementById('theInvisibleArray').innerText;
+        let playlistInitialSongCount = document.getElementById('theInvisibleArray').innerText; // TODO: Delete invisible array
         let howManyAreThere = document.querySelectorAll('div.songAndThumbnail').length;
-        const playlistTitlesArray = Array.from(document.querySelectorAll('input.playlistTitle'), input => input.value);
-        let theArrayThatIWillGiveToPython = [];
+        const playlistTitlesArray = (Array.from(document.querySelectorAll('input.playlistTitle'), input => input.value));
+        const dataLinks = Array.from(document.querySelectorAll('.songAndThumbnail')).map(div => div.getAttribute('data-link'));
+        playlistTitlesArray.shift();
+        dataLinks.shift();
+
         if (!isValidFileName(document.getElementById('playlistTitle0').value)) {
-            document.getElementById('downloadModalText').innerText = (`Invalid characters in the playlist name. These characters cannot be used in filenames: / \\ ' : * ? " < > | ,`); 
+            document.getElementById('downloadModalText').innerText = (`Invalid characters in the playlist name. These characters cannot be used in filenames: / \\ ' . : * ? " < > | ,`); 
             document.getElementById('finalDownloadButton').disabled = false;
-            return;
+            return; // TODO: Same named playlist ?  // TODO pypy7 yi sil
         }
 
         let tavuk = 1;
@@ -1373,11 +1376,11 @@ function actuallyDownloadTheSong() {
         while (tavuk < howManyAreThere) {
             if (barbeku == 5001) {break;}
             if (document.getElementById(`playlistTitle${barbeku}`)) {                
-                let outputFilePath = path.join(taratorFolder, 'musics', `${playlistTitlesArray[tavuk]}.mp3`);                
+                let outputFilePath = path.join(taratorFolder, 'musics', `${playlistTitlesArray[tavuk-1]}.mp3`);                
                 if (document.getElementById('playlistTitle' + barbeku)) { 
                     const duplicates = findDuplicates(playlistTitlesArray);
                     if (!isValidFileName(document.getElementById('playlistTitle' + barbeku).value)) {
-                        document.getElementById('downloadModalText').innerText = (`Invalid characters in ${barbeku}. songs name. These characters cannot be used in filenames: / \\ ' : * ? " < > | ,`); 
+                        document.getElementById('downloadModalText').innerText = (`Invalid characters in ${barbeku}. songs name. These characters cannot be used in filenames: / \\ ' . : * ? " < > | ,`); 
                         document.getElementById('finalDownloadButton').disabled = false;
                         return;
                     } else if ((document.getElementById('playlistTitle' + barbeku).value).length > 100) {
@@ -1385,7 +1388,7 @@ function actuallyDownloadTheSong() {
                         document.getElementById('finalDownloadButton').disabled = false;
                         return;
                     } else if (fileExists(outputFilePath)) {
-                        document.getElementById('downloadModalText').innerText = (`File ${playlistTitlesArray[tavuk]}.mp3 already exists. Please choose a different filename.`);
+                        document.getElementById('downloadModalText').innerText = (`File ${playlistTitlesArray[tavuk-1]}.mp3 already exists. Please choose a different filename.`);
                         document.getElementById('finalDownloadButton').disabled = false;
                         return;
                     } else if (duplicates.length > 0) {
@@ -1393,69 +1396,80 @@ function actuallyDownloadTheSong() {
                         document.getElementById('finalDownloadButton').disabled = false;
                         return;
                     }
-                    theArrayThatIWillGiveToPython[tavuk - 1] = (document.getElementById('playlistTitle' + barbeku).value.trim())
                 }
                 tavuk++;
             }
             barbeku++
         }
 
-        console.log(theArrayThatIWillGiveToPython);
-        saveeeAsPlaylist(theArrayThatIWillGiveToPython);
+        console.log(dataLinks);
+        console.log("playlistTitlesArray",playlistTitlesArray);
+        saveeeAsPlaylist(playlistTitlesArray);
         document.getElementById('downloadModalText').innerText = "Downloading...";
-        const pythonProcessTitle = spawn('python', [ path.join(taratorFolder, 'pypy7.py'), theArrayThatIWillGiveToPython, document.getElementById('downloadFirstInput').value.trim()]);
-        pythonProcessTitle.stdout.on('data', (data) => {
-            document.getElementById('downloadModalText').innerText = data.toString().trim();
 
-            let peynir = 1;
-            let j = 1;
-
-            while (peynir < howManyAreThere) {
-                if (j == 5001) {break;}
-                if (document.getElementById(`thumbnailImage${j}`)) {
-                    let img = document.getElementById(`thumbnailImage${j}`);
-                    let songName = document.getElementById(`playlistTitle${j}`).value;
-                    peynir++;
-                    fetch(img.src)
-                        .then(res => res.blob())
-                        .then(blob => {
-                            let reader = new FileReader();
-                            reader.onloadend = function() {
-                                let base64data = reader.result;
-                                let tempFilePath = path.join(taratorFolder, `temp_thumbnail_${songName}.txt`);
-                                try {
-                                    fs.writeFileSync(tempFilePath, base64data);
-                                    let pythonProcess = spawn('python', [path.join(taratorFolder, 'pypy6.py'), tempFilePath, songName]);
-
-                                    pythonProcess.stdout.on('data', (data) => {
-                                        let decodedData = data.toString().trim();
-                                        let parsedData;
-                                        try { parsedData = JSON.parse(decodedData); } 
-                                        catch (error) { 
-                                            console.error(`Error parsing JSON: ${error}`); 
-                                            parsedData = { error: 'Invalid JSON' }; 
-                                        }
-                                        document.getElementById('downloadModalText').innerText += (parsedData.message || parsedData.error || 'Unknown response') + '\n';
-                                    });
-
-                                    pythonProcess.stderr.on('data', (data) => { console.error(`Error: ${data}`); });
-                                    pythonProcess.on('close', (code) => { 
-                                        console.log(`Python process exited with code ${code}`); 
-                                        if (fs.existsSync(tempFilePath)) {
-                                            fs.unlinkSync(tempFilePath); 
-                                        }
-                                    });
-                                } catch (error) {
-                                    console.error(`Error writing file: ${error}`);
-                                }
-                            };
-                            reader.readAsDataURL(blob);
-                        }).catch(error => console.error(`Error: ${error}`));
+        for (i = 0; i < howManyAreThere - 1; i++) {
+            console.log(playlistTitlesArray[i], dataLinks[i])
+            const pythonProcessTitle = spawn('python', [ path.join(taratorFolder, 'pypy5.py'), dataLinks[i], playlistTitlesArray[i]]);
+            pythonProcessTitle.stdout.on('data', (data) => {
+                let decodedData = data.toString().trim();
+                let parsedData;
+                try { parsedData = JSON.parse(decodedData); } 
+                catch (error) { 
+                    console.error(`Error parsing JSON: ${error}`); 
+                    parsedData = { error: 'Invalid JSON' }; 
                 }
-                j++;
+                document.getElementById('downloadModalText').innerText += (parsedData.message || parsedData.error || 'Unknown response') + '\n'; // TODO HATA VERİRSE BUTON AKTİVE VE MESAJ
+            }); // TODO: Sadece hatalar mesaj yazdırsın
+        }
+
+        let peynir = 1;
+        let j = 1;
+
+        while (peynir < howManyAreThere) {
+            if (j == 5001) {break;}
+            if (document.getElementById(`thumbnailImage${j}`)) {
+                let img = document.getElementById(`thumbnailImage${j}`);
+                let songName = document.getElementById(`playlistTitle${j}`).value;
+                peynir++;
+                fetch(img.src)
+                    .then(res => res.blob())
+                    .then(blob => {
+                        let reader = new FileReader();
+                        reader.onloadend = function() {
+                            let base64data = reader.result;
+                            let tempFilePath = path.join(taratorFolder, `temp_thumbnail_${songName}.txt`);
+                            try {
+                                fs.writeFileSync(tempFilePath, base64data);
+                                let pythonProcess = spawn('python', [path.join(taratorFolder, 'pypy6.py'), tempFilePath, songName]);
+
+                                pythonProcess.stdout.on('data', (data) => {
+                                    let decodedData = data.toString().trim();
+                                    let parsedData;
+                                    try { parsedData = JSON.parse(decodedData); } 
+                                    catch (error) { 
+                                        console.error(`Error parsing JSON: ${error}`); 
+                                        parsedData = { error: 'Invalid JSON' }; 
+                                    }
+                                    document.getElementById('downloadModalText').innerText += (parsedData.message || parsedData.error || 'Unknown response') + '\n';
+                                    document.getElementById('finalDownloadButton').disabled = false;
+                                });
+
+                                pythonProcess.stderr.on('data', (data) => { console.error(`Error: ${data}`); });
+                                pythonProcess.on('close', (code) => { 
+                                    console.log(`Python process exited with code ${code}`); 
+                                    if (fs.existsSync(tempFilePath)) {
+                                        fs.unlinkSync(tempFilePath); 
+                                    }
+                                });
+                            } catch (error) {
+                                console.error(`Error writing file: ${error}`);
+                            }
+                        };
+                        reader.readAsDataURL(blob);
+                    }).catch(error => console.error(`Error: ${error}`));
             }
-            document.getElementById('finalDownloadButton').disabled = false;
-        });
+            j++;
+        }            
     } else {
         document.getElementById('downloadModalText').innerText = "The URL is neither a video or a playlist."
         document.getElementById('finalDownloadButton').disabled = false;
@@ -1546,7 +1560,7 @@ function differentiateYouTubeLinks(url) {
     }
 }
 
-function saveeeAsPlaylist(theArrayThatIWillGiveToPython) {
+function saveeeAsPlaylist(playlistTitlesArray) {
     if (isSaveAsPlaylistActive) {
         const jsonFilePath = path.join(taratorFolder, 'playlists.json');
         const thumbnailDir = path.join(taratorFolder, 'thumbnails');
@@ -1570,7 +1584,7 @@ function saveeeAsPlaylist(theArrayThatIWillGiveToPython) {
 
                 let newPlaylist = {
                     name: playlistName,
-                    songs: theArrayThatIWillGiveToPython,
+                    songs: playlistTitlesArray,
                     thumbnail: path.join(thumbnailDir, `${playlistName}_thumbnail.jpg`)
                 };
 

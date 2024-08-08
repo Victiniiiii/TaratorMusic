@@ -673,3 +673,7 @@ input:checked + .slider:before {
     width: 30px;
     height: 30px;
 }
+
+#mainmenutimespent {
+    color: orange;
+}
