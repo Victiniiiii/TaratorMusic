@@ -1180,6 +1180,7 @@ function checkNameThumbnail() {
             try { decodedJson = JSON.parse(decodedData); } 
             catch (error) { console.error('Error parsing JSON:', error); return; }
             if (decodedJson.error) { console.error('Python script error:', decodedJson.error); return; }
+            if (decodedJson.length > 10) {document.getElementById('downloadModalText').innerHTML = "Checking... Might take long...";}
 
             const pythonProcessThumbnail2 = spawn('python', [ path.join(taratorFolder, 'pypy4.py'), document.getElementById('downloadFirstInput').value ]);
             pythonProcessThumbnail2.stdout.on('data', (data) => {
@@ -1254,7 +1255,7 @@ function checkNameThumbnail() {
                         thumbnailInput.className = 'thumbnailInput';
                         thumbnailInput.id = 'thumbnailInput' + i;
                         thumbnailInput.accept = 'image/*';
-                        thumbnailInput.onchange = function(event) { updateThumbnailImage(event, playlist.playlist_id); }; // çalışmıyor. ( galiba )
+                        thumbnailInput.onchange = function(event) { updateThumbnailImage(event, playlist.playlist_id); }; // çalışmıyor.
                         exampleDownloadColumn.appendChild(thumbnailInput);
         
                         const thumbnailImage = document.createElement('img');
@@ -1330,7 +1331,7 @@ function actuallyDownloadTheSong() {
                     const decodedData = data.toString().trim();
                     let parsedData;
                     try { parsedData = JSON.parse(decodedData); } 
-                    catch (error) { console.error(`Error parsing JSON: ${error}`); parsedData = { error: 'Invalid JSON' }; }
+                    catch (error) { console.error(`Error parsing JSON: ${error}`); parsedData = { error: 'Invalid JSON' }; document.getElementById('finalDownloadButton').disabled = false; }
                     document.getElementById('downloadModalText').innerText = parsedData.message || parsedData.error || 'Unknown response';
                     fetch(img.src)
                     .then(res => res.blob())
@@ -1406,25 +1407,10 @@ function actuallyDownloadTheSong() {
             barbeku++
         }
 
-        console.log(dataLinks);
-        console.log("playlistTitlesArray",playlistTitlesArray);
         saveeeAsPlaylist(playlistTitlesArray);
         document.getElementById('downloadModalText').innerText = "Downloading...";
-
-        for (i = 0; i < howManyAreThere - 1; i++) {
-            console.log(playlistTitlesArray[i], dataLinks[i])
-            const pythonProcessTitle = spawn('python', [ path.join(taratorFolder, 'pypy5.py'), dataLinks[i], playlistTitlesArray[i]]);
-            pythonProcessTitle.stdout.on('data', (data) => {
-                let decodedData = data.toString().trim();
-                let parsedData;
-                try { parsedData = JSON.parse(decodedData); } 
-                catch (error) { 
-                    console.error(`Error parsing JSON: ${error}`); 
-                    parsedData = { error: 'Invalid JSON' }; 
-                }
-                document.getElementById('downloadModalText').innerText += (parsedData.message || parsedData.error || 'Unknown response') + '\n'; // TODO HATA VERİRSE BUTON AKTİVE VE MESAJ
-            }); // TODO: Sadece hatalar mesaj yazdırsın
-        }
+        if (howManyAreThere > 50) {document.getElementById('downloadModalText').innerText = "Downloading... But it might take some time...";}
+        newDownloadingFunction(howManyAreThere, i = 0, dataLinks, playlistTitlesArray);
 
         let peynir = 1;
         let j = 1;
@@ -1453,9 +1439,12 @@ function actuallyDownloadTheSong() {
                                     catch (error) { 
                                         console.error(`Error parsing JSON: ${error}`); 
                                         parsedData = { error: 'Invalid JSON' }; 
+                                        document.getElementById('finalDownloadButton').disabled = false;
                                     }
-                                    document.getElementById('downloadModalText').innerText += (parsedData.message || parsedData.error || 'Unknown response') + '\n';
-                                    document.getElementById('finalDownloadButton').disabled = false;
+                                    if (peynir == howManyAreThere - 1) {
+                                        document.getElementById('downloadModalText').innerText = ("Downloaded all thumbnails successfully !" || parsedData.error || 'Unknown response') + '\n';
+                                        document.getElementById('finalDownloadButton').disabled = false;
+                                    }
                                 });
 
                                 pythonProcess.stderr.on('data', (data) => { console.error(`Error: ${data}`); });
@@ -1634,6 +1623,31 @@ function findDuplicates(array) {
     }
 
     return Array.from(duplicates);
+}
+
+function newDownloadingFunction(howManyAreThere, i = 0, dataLinks, playlistTitlesArray) {
+    console.log(playlistTitlesArray[i], dataLinks[i])
+    const pythonProcessTitle = spawn('python', [ path.join(taratorFolder, 'pypy5.py'), dataLinks[i], playlistTitlesArray[i]]);
+    pythonProcessTitle.stdout.on('data', (data) => {
+        let decodedData = data.toString().trim();
+        let parsedData;
+        try { parsedData = JSON.parse(decodedData);
+            i++;
+            if (i < howManyAreThere - 1) {
+                document.getElementById('downloadModalText').innerText = ("Advancing to the ",i+1,". song." || parsedData.error || 'Unknown response') + '\n';
+                newDownloadingFunction(howManyAreThere, i, dataLinks, playlistTitlesArray);                
+            } else {
+                document.getElementById('downloadModalText').innerText = ("Downloaded all songs successfully!" || parsedData.error || 'Unknown response') + '\n';
+                console.log("Done!")
+                document.getElementById('finalDownloadButton').disabled = false;
+            }
+        } 
+        catch (error) { 
+            console.error(`Error parsing JSON: ${error}`); 
+            parsedData = { error: 'Invalid JSON' }; 
+            document.getElementById('finalDownloadButton').disabled = false;
+        }
+    });
 }
 
 document.getElementById('playlists').click();

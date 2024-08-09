@@ -590,6 +590,7 @@ video, audio {
     display: flex;
     justify-content: start;
     align-items: center;
+    padding-left: 0.5vw;
 }
 
 #finalDownloadButton {
