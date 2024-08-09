@@ -1329,10 +1329,17 @@ function actuallyDownloadTheSong() {
                 const pythonProcessFileName = spawn('python', [ path.join(taratorFolder, 'pypy5.py'), document.getElementById('downloadFirstInput').value, secondInput ]);
                 pythonProcessFileName.stdout.on('data', (data) => {
                     const decodedData = data.toString().trim();
+                    console.log(data.toString().trim());
                     let parsedData;
-                    try { parsedData = JSON.parse(decodedData); } 
-                    catch (error) { console.error(`Error parsing JSON: ${error}`); parsedData = { error: 'Invalid JSON' }; document.getElementById('finalDownloadButton').disabled = false; }
-                    document.getElementById('downloadModalText').innerText = parsedData.message || parsedData.error || 'Unknown response';
+                    try { parsedData = JSON.parse(decodedData);
+                        document.getElementById('downloadModalText').innerText = "Song downloaded successfully!";
+                    } 
+                    catch (error) { console.error(`Error parsing JSON: ${error}`); parsedData = { 
+                        error: 'Invalid JSON' }; 
+                        document.getElementById('finalDownloadButton').disabled = false;
+                        document.getElementById('downloadModalText').innerText = parsedData.message;
+                    }
+                    
                     fetch(img.src)
                     .then(res => res.blob())
                     .then(blob => {
@@ -1348,12 +1355,15 @@ function actuallyDownloadTheSong() {
                                 let parsedData;
                                 try { parsedData = JSON.parse(decodedData); } 
                                 catch (error) { console.error(`Error parsing JSON: ${error}`); parsedData = { error: 'Invalid JSON' }; }
-                                document.getElementById('downloadModalText').innerText = document.getElementById('downloadModalText').innerText + (parsedData.message || parsedData.error || 'Unknown response');
-                                document.getElementById('finalDownloadButton').disabled = false;
+                                document.getElementById('downloadModalText').innerText = document.getElementById('downloadModalText').innerText + " Thumbnail downloaded successfully!"                                
                             });
 
                             pythonProcessFileThumbnail.stderr.on('data', (data) => { console.error(`Error: ${data}`); });
-                            pythonProcessFileThumbnail.on('close', (code) => { console.log(`Python process exited with code ${code}`); fs.unlinkSync(tempFilePath); });
+                            pythonProcessFileThumbnail.on('close', (code) => { 
+                                console.log(`Python process exited with code ${code}`);
+                                    fs.unlinkSync(tempFilePath); 
+                                    document.getElementById('finalDownloadButton').disabled = false;
+                                });
                         };
                         reader.readAsDataURL(blob);
                     }).catch(error => console.error(`Error: ${error}`));
@@ -1410,7 +1420,7 @@ function actuallyDownloadTheSong() {
         saveeeAsPlaylist(playlistTitlesArray);
         document.getElementById('downloadModalText').innerText = "Downloading...";
         if (howManyAreThere > 50) {document.getElementById('downloadModalText').innerText = "Downloading... But it might take some time...";}
-        newDownloadingFunction(howManyAreThere, i = 0, dataLinks, playlistTitlesArray);
+        testFunctionTest(howManyAreThere, dataLinks, playlistTitlesArray);
 
         let peynir = 1;
         let j = 1;
@@ -1440,19 +1450,14 @@ function actuallyDownloadTheSong() {
                                         console.error(`Error parsing JSON: ${error}`); 
                                         parsedData = { error: 'Invalid JSON' }; 
                                         document.getElementById('finalDownloadButton').disabled = false;
-                                    }
-                                    if (peynir == howManyAreThere - 1) {
-                                        document.getElementById('downloadModalText').innerText = ("Downloaded all thumbnails successfully !" || parsedData.error || 'Unknown response') + '\n';
-                                        document.getElementById('finalDownloadButton').disabled = false;
-                                    }
+                                    }                                    
                                 });
 
                                 pythonProcess.stderr.on('data', (data) => { console.error(`Error: ${data}`); });
                                 pythonProcess.on('close', (code) => { 
                                     console.log(`Python process exited with code ${code}`); 
-                                    if (fs.existsSync(tempFilePath)) {
-                                        fs.unlinkSync(tempFilePath); 
-                                    }
+                                    if (fs.existsSync(tempFilePath)) { fs.unlinkSync(tempFilePath); }
+                                    document.getElementById('downloadModalText').innerText = ("Downloaded all thumbnails successfully !" || parsedData.error || 'Unknown response') + '\n';
                                 });
                             } catch (error) {
                                 console.error(`Error writing file: ${error}`);
@@ -1462,7 +1467,7 @@ function actuallyDownloadTheSong() {
                     }).catch(error => console.error(`Error: ${error}`));
             }
             j++;
-        }            
+        }
     } else {
         document.getElementById('downloadModalText').innerText = "The URL is neither a video or a playlist."
         document.getElementById('finalDownloadButton').disabled = false;
@@ -1625,28 +1630,33 @@ function findDuplicates(array) {
     return Array.from(duplicates);
 }
 
-function newDownloadingFunction(howManyAreThere, i = 0, dataLinks, playlistTitlesArray) {
-    console.log(playlistTitlesArray[i], dataLinks[i])
-    const pythonProcessTitle = spawn('python', [ path.join(taratorFolder, 'pypy5.py'), dataLinks[i], playlistTitlesArray[i]]);
-    pythonProcessTitle.stdout.on('data', (data) => {
-        let decodedData = data.toString().trim();
-        let parsedData;
-        try { parsedData = JSON.parse(decodedData);
-            i++;
-            if (i < howManyAreThere - 1) {
-                document.getElementById('downloadModalText').innerText = ("Advancing to the ",i+1,". song." || parsedData.error || 'Unknown response') + '\n';
-                newDownloadingFunction(howManyAreThere, i, dataLinks, playlistTitlesArray);                
-            } else {
-                document.getElementById('downloadModalText').innerText = ("Downloaded all songs successfully!" || parsedData.error || 'Unknown response') + '\n';
-                console.log("Done!")
-                document.getElementById('finalDownloadButton').disabled = false;
-            }
-        } 
-        catch (error) { 
-            console.error(`Error parsing JSON: ${error}`); 
-            parsedData = { error: 'Invalid JSON' }; 
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function testFunctionTest(howManyAreThere, dataLinks, playlistTitlesArray) {    
+    for (i = 0; i < howManyAreThere; i++) {
+        console.log(playlistTitlesArray[i], dataLinks[i])
+        newDownloadingFunction(dataLinks[i],playlistTitlesArray[i]);
+        await sleep(30000);
+        if (i < howManyAreThere - 1) {
+            document.getElementById('downloadModalText').innerText = "Done downloading the " + (i+1) + ". song.";            
+            newDownloadingFunction(howManyAreThere, i, dataLinks, playlistTitlesArray);                
+        } else {
             document.getElementById('finalDownloadButton').disabled = false;
         }
+    }
+}
+
+function newDownloadingFunction(frfrfr, rfrfrf) {    
+    const pythonProcessTitle = spawn('python', [ path.join(taratorFolder, 'pypy5.py'), frfrfr, rfrfrf]);
+    pythonProcessTitle.stdout.on('data', (data) => {
+        console.log(data.toString().trim())
+    });
+    pythonProcessTitle.stderr.on('data', (data) => { 
+        document.getElementById('downloadModalText').innerText = (`Error: ${data}`); 
+        console.log(data.toString().trim())
+        document.getElementById('finalDownloadButton').disabled = false;
     });
 }
 
