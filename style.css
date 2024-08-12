@@ -305,7 +305,7 @@ video, audio {
     border-radius: 5px;
     white-space: nowrap;
     overflow: hidden;
-    cursor: pointer; /* 'hover' is not a valid cursor value */
+    cursor: pointer;
     text-overflow: ellipsis;
 }
 
