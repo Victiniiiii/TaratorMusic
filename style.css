@@ -42,6 +42,7 @@ body::-webkit-scrollbar {
 .flexrow {
     display: flex;
     flex-direction: row;
+    align-items: center;
 }
 
 .flexcolumn {
@@ -339,6 +340,7 @@ video, audio {
 #volume {
     width: 9vw;
     margin-right: 1vw;
+    cursor: pointer;
 }
 
 #downloadResultDiv {
@@ -526,11 +528,12 @@ video, audio {
 
 #downloadFirstInput {
     width: 70vw;
+    height: 5vh;
 }
 
 #downloadFirstButton {
     width: 8vw;
-    height: 5vh;
+    height: 5.8vh;
 }
 
 #downloadSecondPhase {
@@ -552,7 +555,7 @@ video, audio {
 
 #downloadPlaceofSongs {
     width: 78vw;
-    height: 60vh;
+    height: 59vh;
     border: 1px solid white;
     box-sizing: border-box;
     overflow-y: scroll;
@@ -633,6 +636,7 @@ video, audio {
     display: inline-block;
     width: 60px;
     height: 34px;
+    margin-left: 2vw;
 }
 
 .switch input {
@@ -680,4 +684,14 @@ input:checked + .slider:before {
 
 #mainmenutimespent {
     color: orange;
+}
+
+#saveAsPlaylist {
+    width: 4vw;
+    height: 10vw;
+}
+
+.deleteThisPlaylistSong {
+    width: 4vw;
+    height: 10vw;
 }
