@@ -1,16 +1,17 @@
 {
     "name": "taratormusic",
     "version": "1.0.0",
-    "description": "",
+    "description": "A music player application with playlist support and Discord integration.",
     "main": "index.js",
     "scripts": {
         "start": "electron ."
     },
     "keywords": [],
-    "author": "",
+    "author": "Victiniiiii",
     "license": "ISC",
     "devDependencies": {
         "electron": "^31.1.0",
+        "electron-builder": "^24.13.3",
         "electron-reload": "^2.0.0-alpha.1"
     },
     "dependencies": {
@@ -21,6 +22,33 @@
     },
     "build": {
         "productName": "TaratorMusic",
-        "icon": "thumbnails/tarator16_icon"
+        "icon": "thumbnails/tarator16_icon",
+        "directories": {
+            "output": "build"
+        },
+        "files": [
+          "dist/**/*",
+          "node_modules/**/*",
+          "package.json"
+        ],
+        "win": {
+            "target": "nsis"
+        },
+        "publish": {
+            "provider": "github",
+            "owner": "Victiniiiii",
+            "repo": "TaratorMusic"
+        },
+        "nsis": {
+            "oneClick": false,
+            "perMachine": true,
+            "allowElevation": true,
+            "allowToChangeInstallationDirectory": true,
+            "installerHeaderIcon": "thumbnails/tarator16_icon",
+            "createDesktopShortcut": true,
+            "createStartMenuShortcut": true,
+            "shortcutName": "TaratorMusic",
+            "artifactName": "${productName} Setup ${version}.${ext}"
+        }
     }
 }

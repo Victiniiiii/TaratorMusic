@@ -1,7 +1,7 @@
 // renderer.js
 
 const { ipcRenderer } = require('electron');
-const icon = require('./svg.ts');
+const icon = require('./svg.js');
 const fs = require('fs');
 const path = require('path');
 const { spawn } = require('child_process');
