@@ -20,11 +20,11 @@
     ],
     "win": {
       "target": "nsis",
-      "icon": "icons/win/icon.ico"
+      "icon": "tarator_icon.ico"
     },
     "mac": {
       "target": "dmg",
-      "icon": "icons/mac/icon.icns"
+      "icon": "tarator_icon.ico"
     }
   },
   "dependencies": {
