@@ -3,4 +3,4 @@ musics/
 thumbnails/
 currently_not_used/
 playlists.json
-build/
+dist/
