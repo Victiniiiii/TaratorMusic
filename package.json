@@ -4,50 +4,57 @@
     "description": "A music player application with playlist support and Discord integration.",
     "main": "index.js",
     "scripts": {
-        "start": "electron .",
-        "build": "electron-builder"
+      "start": "electron .",
+      "build": "electron-builder"
     },
     "keywords": [],
     "author": "Victiniiiii",
     "license": "ISC",
     "devDependencies": {
-        "electron": "^31.1.0",
-        "electron-builder": "^24.13.3",
-        "electron-reload": "^2.0.0-alpha.1"
+      "electron": "^31.1.0",
+      "electron-builder": "^24.13.3",
+      "electron-reload": "^2.0.0-alpha.1"
     },
     "dependencies": {
-        "discord-rich-presence": "^0.0.8",
-        "discord-rpc": "^4.0.1",
-        "electron-is-dev": "^3.0.1",
-        "ytdl-core": "^4.11.5"
+      "discord-rich-presence": "^0.0.8",
+      "discord-rpc": "^4.0.1",
+      "electron-is-dev": "^3.0.1",
+      "ytdl-core": "^4.11.5"
     },
     "build": {
-        "productName": "TaratorMusic",
-        "icon": "thumbnails/tarator16_icon",
-        "directories": {
-            "output": "build"
-        },
-        "files": [
-        "**/*"
-        ],
-        "win": {
-            "target": "nsis"
-        },
-        "publish": {
-            "provider": "github",
-            "owner": "Victiniiiii",
-            "repo": "TaratorMusic"
-        },
-        "nsis": {
-            "oneClick": false,
-            "perMachine": true,
-            "allowElevation": true,
-            "allowToChangeInstallationDirectory": true,
-            "installerHeaderIcon": "thumbnails/tarator16_icon",
-            "createDesktopShortcut": true,
-            "createStartMenuShortcut": true,
-            "shortcutName": "TaratorMusic",
-            "artifactName": "${productName} Setup ${version}.${ext}"
-        }
+      "appId": "com.yourdomain.taratormusic",
+      "productName": "TaratorMusic",
+      "files": [
+        "index.html",
+        "index.js",
+        "preload.js",
+        "renderer.js",
+        "style.css",
+        "svg.js",
+        "node_modules/**/*",
+        "musics/**/*",
+        "thumbnails/**/*",
+        "playlists.json",
+        "pypy1.py",
+        "pypy2.py",
+        "pypy3.py",
+        "pypy4.py",
+        "pypy5.py",
+        "pypy6.py",
+        "pypy9.py"
+      ],
+      "directories": {
+        "output": "build"
+      },
+      "win": {
+        "target": "nsis",
+        "icon": "thumbnails/tarator512_icon"
+      },
+      "nsis": {
+        "oneClick": false,
+        "perMachine": true,
+        "allowToChangeInstallationDirectory": true
+      }
     }
-}
+  }
+  
