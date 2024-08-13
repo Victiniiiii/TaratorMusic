@@ -4,7 +4,6 @@
 const { app, BrowserWindow, ipcMain, Menu } = require('electron');
 const path = require('path');
 const fs = require('fs');
-const { spawn } = require('child_process');
 const taratorFolder = __dirname;
 
 function createWindow() {
@@ -16,7 +15,7 @@ function createWindow() {
         webPreferences: {
             contextIsolation: false,
             nodeIntegration: true,
-            additionalArguments: ['Content-Security-Policy', "script-src 'self' 'nonce-6vrfjvkCAwBXQF+vNhKVlA==';"] // try to remove nonce ( or this line completely )
+            additionalArguments: ['Content-Security-Policy', "script-src 'self'"]
         }
     });
 
@@ -24,7 +23,7 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
-    // Menu.setApplicationMenu(null); ( removes the bar at the top )
+    Menu.setApplicationMenu(null); // ( removes the bar at the top )
     app.setName("TaratorMusic");
     createWindow();
 
@@ -70,7 +69,6 @@ ipcMain.handle('get-music-path', (event) => { // Remove this part ?
 
 ipcMain.on('get-music-files', async (event) => {
 try {
-    const desktopPath = app.getPath('desktop');
     const musicFolderPath = path.join(taratorFolder, 'musics');
     const files = await fs.promises.readdir(musicFolderPath);
     const musicFiles = files
