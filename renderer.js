@@ -178,6 +178,7 @@ document.getElementById('shuffleButton').innerHTML = icon.redShuffle;
 document.getElementById('muteButton').innerHTML = icon.mute;
 document.getElementById('speedButton').innerHTML = icon.speed;
 document.getElementById('loopButton').innerHTML = icon.redLoop;
+document.getElementById('mainmenulogo').style.backgroundImage = 'url(thumbnails/tarator1024_icon.png)';
 
 let previousVolume = volumeControl.value;
 volumeControl.value = localStorage.getItem('volume') || 100;
