@@ -4,7 +4,8 @@
     "description": "A music player application with playlist support and Discord integration.",
     "main": "index.js",
     "scripts": {
-        "start": "electron ."
+        "start": "electron .",
+        "build": "electron-builder"
     },
     "keywords": [],
     "author": "Victiniiiii",
@@ -27,9 +28,7 @@
             "output": "build"
         },
         "files": [
-          "dist/**/*",
-          "node_modules/**/*",
-          "package.json"
+        "**/*"
         ],
         "win": {
             "target": "nsis"
