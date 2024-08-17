@@ -10,7 +10,7 @@
 Aren't you tired of listening to same ten songs in your youtube or spotify playlist ? Too many ads ? What if you want to listen to music offline? This app runs to your aid...
 
 # Actual Random
-The randomness of the next song in TaratorMusic has been statistically proven by Chi Square Test. In the test, 10.000 random songs have played after each other, and the test was even successful at 0.01 significance level.
+The randomness of the next song in TaratorMusic has been statistically proven by Chi Square Test. In the test, 10.000 random songs have played after each other, and the test was successful even at 0.01 significance level.
 ![chisquare](https://github.com/user-attachments/assets/42e0b42a-8c44-4605-8701-db20e302aff8)
 
 # Download Your Own
