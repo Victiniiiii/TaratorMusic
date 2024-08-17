@@ -419,7 +419,7 @@ video, audio {
 
 #main-menu-content {
     display: block;
-    height: 92vh;
+    height: 85vh;
     width: 82vw;
 }
 
@@ -612,6 +612,20 @@ video, audio {
     background-position: center;
     background-repeat: no-repeat;
     margin-bottom: calc(42vh - 20vw);
+    margin-left: 5vw;
+    margin-right: 5vw;
+    animation: marginShift 1.5s infinite alternate ease-in-out;
+}
+
+@keyframes marginShift {
+    0% {
+        margin-left: 15vw;
+        margin-right: 0vw;
+    }
+    100% {
+        margin-left: 0vw;
+        margin-right: 15vw;
+    }
 }
 
 #mainmenuapptext {
