@@ -1015,9 +1015,7 @@ document.getElementById('savePlaylistButton').addEventListener('click', () => {
         alert('Please select a thumbnail for the playlist.');
         return;
     }
-
-    // TODO: Aynı isimde playlistte uyarmıyo 1!!!!!!!
-
+    
     const thumbnailsDirectory = path.join(taratorFolder, 'thumbnails');
     const playlistsFilePath = path.join(taratorFolder, 'playlists.json');
 
@@ -1028,7 +1026,7 @@ document.getElementById('savePlaylistButton').addEventListener('click', () => {
             try {
                 playlists = JSON.parse(data);
                 if (playlists.find(playlist => playlist.name === playlistName)) {
-                    event.reply('playlist-creation-error', 'Playlist name already exists.'); 
+                    alert('Playlist name already exists.'); 
                     return; 
                 }
             } catch (parseErr) { 
