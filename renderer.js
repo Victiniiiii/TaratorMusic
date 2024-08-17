@@ -1140,6 +1140,7 @@ function checkNameThumbnail() {
                 downloadSecondInput.type = 'text';
                 downloadSecondInput.id = 'downloadSecondInput';
                 downloadSecondInput.value = decodedString;
+                downloadSecondInput.spellcheck = false;
 
                 const thumbnailInput = document.createElement('input');
                 thumbnailInput.type = 'file';
@@ -1219,6 +1220,7 @@ function checkNameThumbnail() {
                         downloadSecondInput.className = 'playlistTitle';
                         downloadSecondInput.id = 'playlistTitle' + i;
                         downloadSecondInput.value = decodedJson[i];
+                        downloadSecondInput.spellcheck = false;
                         exampleDownloadColumn.appendChild(downloadSecondInput);
 
                         if (i == 0) {
