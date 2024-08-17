@@ -4,3 +4,7 @@ thumbnails/
 currently_not_used/
 playlists.json
 dist/
+TaratorMusic-win32-ia32/
+TaratorMusic-win32-x64/
+TaratorMusic-darwin-x64/
+TaratorMusic-linux-x64/
