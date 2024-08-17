@@ -42,7 +42,6 @@ function changeThePreviousSongAmount() {
 }
 
 let discordApi = JSON.parse(localStorage.getItem('discordApi'));
-
 if (discordApi === null) { 
     discordApi = false;
     localStorage.setItem('discordApi', JSON.stringify(discordApi));

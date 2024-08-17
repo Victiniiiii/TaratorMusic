@@ -1,6 +1,6 @@
 // index.js
 
-const { app, BrowserWindow, ipcMain, Menu } = require('electron');
+const { app, BrowserWindow, Menu } = require('electron');
 const path = require('path');
 const taratorFolder = __dirname;
 
