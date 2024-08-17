@@ -1564,7 +1564,7 @@ function deletePlaylist() {
                 }
                 console.log('Playlist deleted successfully');
                 closeModal();
-                document.getElementById('my-music').click();
+                document.getElementById('settings').click();
                 document.getElementById('playlists').click();
             });
         });
