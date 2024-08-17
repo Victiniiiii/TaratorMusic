@@ -41,59 +41,6 @@ function changeThePreviousSongAmount() {
     document.getElementById('arrayLength').value = maximumPreviousSongCount;
 }
 
-/* // not working ( yet )
-let pytubeApiTest = JSON.parse(localStorage.getItem('pytubeApiTest'));
-
-if (pytubeApiTest === null) { 
-    pytubeApiTest = true;
-    localStorage.setItem('pytubeApiTest', JSON.stringify(pytubeApiTest));
-}
-
-function togglePytubeTest() {
-    pytubeApiTest = !pytubeApiTest;
-    localStorage.setItem("pytubeApiTest", JSON.stringify(pytubeApiTest));
-    pytubeTesting();
-}
-
-document.getElementById("toggleSwitchPytube").checked = pytubeApiTest;
-
-
-function pytubeTesting() {
-    if (pytubeApiTest) {
-        const pythonProcessFileName = spawn('python', [ path.join(taratorFolder, 'pypy5.py'), "https://www.youtube.com/watch?v=cdwal5Kw3Fc", "pytubetest" ]);
-        pythonProcessFileName.stdout.on('data', (data) => {
-            const decodedData = data.toString().trim();
-            let parsedData = '';
-            try { 
-                parsedData = JSON.parse(decodedData); 
-            } catch (error) { 
-                console.error(`Error parsing JSON: ${error}`); 
-                parsedData = { error: 'Invalid JSON' }; 
-            } 
-            
-            const statusMessage = typeof parsedData === 'string' ? parsedData : JSON.stringify(parsedData);
-            console.log(statusMessage)
-            
-            if (!statusMessage.toLowerCase().includes("error")) {
-                document.getElementById('mainmenupytubeapi').innerHTML = "Pytube API Status: Online";
-                document.getElementById('mainmenupytubeapi').style.color = 'green';
-            } else {
-                document.getElementById('mainmenupytubeapi').innerHTML = "Pytube API Status: Down";
-                document.getElementById('mainmenupytubeapi').style.color = 'red';
-            }
-        });
-    } else {
-        document.getElementById('mainmenupytubeapi').innerHTML = "Pytube API Testing: Disabled";
-        document.getElementById('mainmenupytubeapi').style.color = 'yellow';
-    }
-}
-
-pytubeTesting();
-*/
-
-document.getElementById('mainmenupytubeapi').innerHTML = "Pytube API Status: Coming Soon";
-document.getElementById('mainmenupytubeapi').style.color = 'orange';
-
 let discordApi = JSON.parse(localStorage.getItem('discordApi'));
 
 if (discordApi === null) { 
@@ -1015,7 +962,7 @@ document.getElementById('savePlaylistButton').addEventListener('click', () => {
         alert('Please select a thumbnail for the playlist.');
         return;
     }
-    
+
     const thumbnailsDirectory = path.join(taratorFolder, 'thumbnails');
     const playlistsFilePath = path.join(taratorFolder, 'playlists.json');
 
