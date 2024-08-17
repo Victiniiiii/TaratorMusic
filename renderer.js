@@ -213,7 +213,7 @@ tabs.forEach(tab => {
     });
 });
 
-function myMusicOnClick(firsttime) {
+async function myMusicOnClick(firsttime) {
     const myMusicContent = document.getElementById('my-music-content');
     myMusicContent.innerHTML = '';
 
@@ -238,15 +238,26 @@ function myMusicOnClick(firsttime) {
 
     myMusicContent.appendChild(musicsearch);
 
-    ipcRenderer.send('get-music-files');
-    ipcRenderer.once('music-files', (event, musicFiles) => {
-        if (firsttime == 1) {} else if (fs.readdirSync(path.join(taratorFolder, 'musics')).length == 0) {
-            document.getElementById('my-music-content').innerHTML = "No songs? Use the download feature in the left, or add some mp3 files to the 'musics' folder."
+    const musicFolderPath = path.join(taratorFolder, 'musics');
+
+    try {
+        const files = await fs.promises.readdir(musicFolderPath);
+        const musicFiles = files
+            .filter(file => file.toLowerCase() !== 'desktop.ini') 
+            .map(file => ({
+                name: file,
+                thumbnail: `file://${path.join(taratorFolder,"thumbnail", file,"_thumbnail")}`
+            }));
+
+        if (firsttime == 1) {} 
+        else if (files.length == 0) {
+            document.getElementById('my-music-content').innerHTML = "No songs? Use the download feature on the left, or add some mp3 files to the 'musics' folder.";
             document.getElementById('my-music-content').style.display = 'block';
             return;
         } else {
             document.getElementById('my-music-content').style.display = 'grid';
         }
+
         musicFiles.forEach(file => {
             const musicElement = createMusicElement(file);
             myMusicContent.appendChild(musicElement);
@@ -254,7 +265,7 @@ function myMusicOnClick(firsttime) {
             if (currentPlayingElement && file.name === currentPlayingElement.getAttribute('data-file-name')) {
                 musicElement.classList.add('playing');
             }
-    
+
             const backgroundElement = musicElement.querySelector('.background-element');
             if (backgroundElement) {
                 backgroundElement.addEventListener('click', () => {
@@ -262,7 +273,9 @@ function myMusicOnClick(firsttime) {
                 });
             }
         });
-    });    
+    } catch (error) {
+        console.error('Error reading music directory:', error);
+    }
 }
 
 function createMusicElement(file) {
@@ -629,20 +642,15 @@ function displayPlaylists(playlists) {
     });
 }
 
-document.getElementById('playlists').addEventListener('click', () => {
-    ipcRenderer.send('get-playlists');
-});
-
-ipcRenderer.on('send-playlists', (event, playlists) => {
-    if (!Array.isArray(playlists)) {
-        console.error('Received invalid playlists data:', playlists);
-        playlists = [];
-    }
-    displayPlaylists(playlists);
-});
+function getPlaylists() {
+    const playlistsFilePath = path.join(taratorFolder, 'playlists.json');
+    fs.readFile(playlistsFilePath, 'utf8', (err, data) => {
+        const playlists = JSON.parse(data);
+        displayPlaylists(playlists);
+    });
+}
 
 ipcRenderer.on('playlist-created', (event, newPlaylist) => {    
-    ipcRenderer.send('get-playlists');
     closeModal();
 });
 
@@ -663,8 +671,10 @@ function openAddToPlaylistModal(songName) {
     playlistsContainer.innerHTML = '';
     let mercimek = songName
 
-    ipcRenderer.send('get-playlists');
-    ipcRenderer.once('send-playlists', (event, playlists) => {
+    const playlistsFilePath = path.join(taratorFolder, 'playlists.json');
+    fs.readFile(playlistsFilePath, 'utf8', (err, data) => {
+        const playlists = JSON.parse(data);
+        displayPlaylists(playlists);
         playlists.forEach(playlist => {
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
@@ -688,9 +698,9 @@ function openAddToPlaylistModal(songName) {
         button.textContent = 'Done';
         button.onclick = function() { addToSelectedPlaylists(mercimek);
             console.log("mercimek",mercimek)
-         };
+        };
         playlistsContainer.appendChild(button);
-    });    
+    });
 }
 
 function addToSelectedPlaylists(mercimek) {
@@ -1006,9 +1016,53 @@ document.getElementById('savePlaylistButton').addEventListener('click', () => {
         return;
     }
 
-    ipcRenderer.send('create-playlist', {
-        playlistName,
-        thumbnailFilePath
+    // TODO: Aynı isimde playlistte uyarmıyo 1!!!!!!!
+
+    const thumbnailsDirectory = path.join(taratorFolder, 'thumbnails');
+    const playlistsFilePath = path.join(taratorFolder, 'playlists.json');
+
+    fs.readFile(playlistsFilePath, 'utf8', (err, data) => {
+        let playlists = [];
+
+        if (!err && data) {
+            try {
+                playlists = JSON.parse(data);
+                if (playlists.find(playlist => playlist.name === playlistName)) {
+                    event.reply('playlist-creation-error', 'Playlist name already exists.'); 
+                    return; 
+                }
+            } catch (parseErr) { 
+                console.error('Error parsing playlists file:', parseErr); 
+            }
+        }
+
+        const newPlaylist = {
+            name: playlistName,
+            songs: [],
+            thumbnail: path.join(thumbnailsDirectory, `${playlistName}_playlist.jpg`)
+        };
+
+        playlists.push(newPlaylist);
+
+        fs.writeFile(playlistsFilePath, JSON.stringify(playlists, null, 2), (writeErr) => {
+            if (writeErr) {
+                console.error('Error updating playlists file:', writeErr);
+                return;
+            }
+            if (thumbnailFilePath) {
+                const newThumbnailPath = path.join(thumbnailsDirectory, `${playlistName}_playlist.jpg`);
+                fs.copyFile(thumbnailFilePath, newThumbnailPath, (copyErr) => {
+                    if (copyErr) {
+                        console.error('Error copying thumbnail file:', copyErr);
+                        return;
+                    }
+                });
+            }
+            closeModal();
+            if (document.getElementById("playlists-content").style.display == "grid") {
+                document.getElementById("playlists").click();
+            }
+        });
     });
 });
 
@@ -1684,6 +1738,12 @@ async function testFunctionTest(howManyAreThere, dataLinks, playlistTitlesArray)
         }
     }
 }
+/*
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'k') {
+      console.log('K pressed');
+    }
+});  */
 
 document.getElementById('playlists').click();
 document.getElementById('main-menu').click();
