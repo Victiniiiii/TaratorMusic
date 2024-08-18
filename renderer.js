@@ -30,8 +30,21 @@ if ( JSON.parse(localStorage.getItem('maximumPreviousSongCount')) == null) {
 }
 document.getElementById('arrayLength').value = maximumPreviousSongCount;
 
+let myMusicToggle = JSON.parse(localStorage.getItem('myMusicToggle'));
+if (myMusicToggle === null) { 
+    myMusicToggle = false;
+    localStorage.setItem('myMusicToggle', JSON.stringify(myMusicToggle));
+}
+
+function toggleMyMusic() {
+    myMusicToggle = !myMusicToggle;
+    localStorage.setItem("myMusicToggle", JSON.stringify(myMusicToggle));
+    console.log(myMusicToggle)
+}
+
+document.getElementById("toggleSwitchMyMusic").checked = myMusicToggle;
+
 function changeThePreviousSongAmount() {
-    console.log("working")
     if (document.getElementById('arrayLength').value > 9 && document.getElementById('arrayLength').value < 101 ) { 
         maximumPreviousSongCount = document.getElementById('arrayLength').value; 
         localStorage.setItem("maximumPreviousSongCount", document.getElementById('arrayLength').value );  
@@ -154,10 +167,20 @@ tabs.forEach(tab => {
                 } else if (content.id === "settings-content"){
                     document.getElementById('settings-content').style.display = 'flex';
                 }
+                if (content.id != "my-music-content" && myMusicToggle == true) {
+                    destroyMyMusic();
+                }
             }
         });
     });
 });
+
+function destroyMyMusic() {
+    const myMusicContent = document.getElementById('my-music-content');
+    while (myMusicContent.firstChild) {
+        myMusicContent.removeChild(myMusicContent.firstChild);
+    }
+}
 
 async function myMusicOnClick(firsttime) {
     const myMusicContent = document.getElementById('my-music-content');
@@ -803,6 +826,7 @@ function playNextSong() {
 }
 
 function randomSongFunctionMainMenu() {    
+    myMusicOnClick(1);
     const musicItems = Array.from(document.querySelectorAll('.music-item'));
     let randomIndex = Math.floor(Math.random() * musicItems.length);
     if (currentPlayingElement) {
@@ -813,6 +837,7 @@ function randomSongFunctionMainMenu() {
     nextSongName = musicItems[randomIndex].getAttribute('data-file-name');
     const file = { name: nextSongName };
     playMusic(file, document.querySelector(`.music-item[data-file-name="${nextSongName}.mp3"]`), false);
+    destroyMyMusic();
 }
 
 function randomPlaylistFunctionMainMenu() {    
@@ -1682,6 +1707,7 @@ async function testFunctionTest(howManyAreThere, dataLinks, playlistTitlesArray)
         }
     }
 }
+
 /*
 document.addEventListener('keydown', (event) => {
     if (event.key === 'k') {
