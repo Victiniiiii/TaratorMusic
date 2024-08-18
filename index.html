@@ -112,27 +112,32 @@
         <div id="my-music-content" class="tab-content hidden"></div>    
         <div id="playlists-content" class="tab-content hidden"></div>               
         <div id="settings-content" class="tab-content hidden">
-            <h1 class="underline-text">API Settings</h1>
-            <div class="flexrow">Discord Connection
-                <label class="switch">
-                    <input type="checkbox" id="toggleSwitchDiscord" onclick="toggleDiscordAPI()">
-                    <span class="slider round"></span>
-                </label>
-            </div>
+            <h1 class="underline-text">Keybinds</h1>
             <h1 class="underline-text">Customisation</h1>
-            <div>Background: Coming Soon</div>            
-            <div>Placeholder Thumbnail: Coming Soon</div>
             <div>Previous Song Array Length
                 <input type="number" id="arrayLength" name="arrayLength" required>
                 <button onclick="changeThePreviousSongAmount()">Change</button>
             </div>
-            <div>Keybinds: Coming Soon</div>
+            <div>Background: Coming Soon</div>            
+            <div>Placeholder Thumbnail: Coming Soon</div>
             <div>Language: Coming Soon</div>
             <div>Edit Background: Coming Soon</div>
             <div>Edit Font: Coming Soon</div>
             <div>Edit My Music Grid: Coming Soon</div>
             <div>Disable Thumbnails: Coming Soon</div>
             <h1 class="underline-text">System</h1>
+            <div class="settingsflexrow">Discord Connection
+                <label class="switch">
+                    <input type="checkbox" id="toggleSwitchDiscord" onclick="toggleDiscordAPI()">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+            <div class="settingsflexrow">Close My Music Contents After Menu Change
+                <label class="switch">
+                    <input type="checkbox" id="toggleSwitchMyMusic" onclick="toggleMyMusic()">
+                    <span class="slider round"></span>
+                </label>
+            </div>
             <div>Move App Folders: Coming Soon</div>
             <div>Add _thumbnail to all new files: Coming Soon</div>
             <div>Package Data: Coming Soon</div>
