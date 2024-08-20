@@ -637,11 +637,18 @@ video, audio {
 .mainmenusquares {
     width: 10vw;
     height: 10vw;
-    border: 1px solid black;
     text-align: center;
     display: flex;
     align-items: center;
     justify-content: center;
+    border-radius: 8px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    background-color: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 1px 12px rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
+    font-size: 1.25rem;
 }
 
 .switch {
