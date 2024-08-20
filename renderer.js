@@ -825,8 +825,8 @@ function playNextSong() {
     }
 }
 
-function randomSongFunctionMainMenu() {    
-    myMusicOnClick(1);
+async function randomSongFunctionMainMenu() {    
+    await myMusicOnClick(1);
     const musicItems = Array.from(document.querySelectorAll('.music-item'));
     let randomIndex = Math.floor(Math.random() * musicItems.length);
     if (currentPlayingElement) {
