@@ -155,7 +155,7 @@ video, audio {
     width: 200px;
     height: 200px;
     position: relative;
-    background-color: rgba(0, 0, 0, 0.4);
+    background-color: rgba(0, 0, 0, 0.6);
     background-size: contain;
     background-position: center;
     background-repeat: no-repeat;
@@ -254,7 +254,6 @@ video, audio {
     left: 50%;
     transform: translateX(-50%);
     color: white;
-    background-color: rgba(0, 0, 0, 0.6);
     padding: 5px 10px;
     border-radius: 5px;
     font-size: 14px;
@@ -272,7 +271,7 @@ video, audio {
     background-color: rgba(0, 0, 0, 0.6);
     padding: 5px 10px;
     border-radius: 5px;
-    font-size: 18px;
+    font-size: 24px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
