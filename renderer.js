@@ -729,16 +729,19 @@ async function playPlaylist(playlist, startingIndex = 0) {
         console.error(`Playlist ${playlist.name} is empty.`);
         return;
     }
-
     currentPlaylist = playlist;
     
-    for (let i = startingIndex; i < playlist.songs.length; i++) {
+    for (let i = startingIndex; i < playlist.songs.length; i++) { // TODO: Playlist ismine hiç bakmıyo, farklı playlistten açabilir
         let songName = playlist.songs[i];        
         const file = { name: songName };
         currentPlaylistElement = i;
         const clickedElement = document.querySelector(`.music-item[data-file-name="${songName}.mp3"]`);
         await playMusic(file, clickedElement, true);
         if (!isAutoplayActive) {break;}
+        if (isShuffleActive) {
+            await playNextSong();
+            break;
+        }
     }
 }
 
