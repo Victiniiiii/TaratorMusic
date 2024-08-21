@@ -30,7 +30,7 @@ if ( JSON.parse(localStorage.getItem('maximumPreviousSongCount')) == null) {
 }
 document.getElementById('arrayLength').value = maximumPreviousSongCount;
 
-let myMusicToggle = JSON.parse(localStorage.getItem('myMusicToggle'));
+/* let myMusicToggle = JSON.parse(localStorage.getItem('myMusicToggle')); // TODO
 if (myMusicToggle === null) { 
     myMusicToggle = false;
     localStorage.setItem('myMusicToggle', JSON.stringify(myMusicToggle));
@@ -42,7 +42,7 @@ function toggleMyMusic() {
     console.log(myMusicToggle)
 }
 
-document.getElementById("toggleSwitchMyMusic").checked = myMusicToggle;
+document.getElementById("toggleSwitchMyMusic").checked = myMusicToggle; */
 
 function changeThePreviousSongAmount() {
     if (document.getElementById('arrayLength').value > 9 && document.getElementById('arrayLength').value < 101 ) { 
@@ -167,20 +167,20 @@ tabs.forEach(tab => {
                 } else if (content.id === "settings-content"){
                     document.getElementById('settings-content').style.display = 'flex';
                 }
-                if (content.id != "my-music-content" && myMusicToggle == true) {
+                /* if (content.id != "my-music-content" && myMusicToggle == true) {
                     destroyMyMusic();
-                }
+                } */ // TODO
             }
         });
     });
 });
 
-function destroyMyMusic() {
+/* function destroyMyMusic() { // TODO
     const myMusicContent = document.getElementById('my-music-content');
     while (myMusicContent.firstChild) {
         myMusicContent.removeChild(myMusicContent.firstChild);
     }
-}
+} */
 
 async function myMusicOnClick(firsttime) {
     const myMusicContent = document.getElementById('my-music-content');
@@ -729,9 +729,10 @@ async function playPlaylist(playlist, startingIndex = 0) {
         console.error(`Playlist ${playlist.name} is empty.`);
         return;
     }
+
     currentPlaylist = playlist;
     
-    for (let i = startingIndex; i < playlist.songs.length; i++) { // TODO: Playlist ismine hiç bakmıyo, farklı playlistten açabilir
+    for (let i = startingIndex; i < playlist.songs.length; i++) {
         let songName = playlist.songs[i];        
         const file = { name: songName };
         currentPlaylistElement = i;
@@ -829,7 +830,7 @@ function playNextSong() {
 }
 
 async function randomSongFunctionMainMenu() {    
-    await myMusicOnClick(1);
+    // await myMusicOnClick(1); //TODO: DestroyMyMusic aktifken bunu kullanıp butonları kullandırtcaksın
     const musicItems = Array.from(document.querySelectorAll('.music-item'));
     let randomIndex = Math.floor(Math.random() * musicItems.length);
     if (currentPlayingElement) {
@@ -840,7 +841,7 @@ async function randomSongFunctionMainMenu() {
     nextSongName = musicItems[randomIndex].getAttribute('data-file-name');
     const file = { name: nextSongName };
     playMusic(file, document.querySelector(`.music-item[data-file-name="${nextSongName}.mp3"]`), false);
-    destroyMyMusic();
+    // destroyMyMusic(); TODO
 }
 
 function randomPlaylistFunctionMainMenu() {    
@@ -848,12 +849,18 @@ function randomPlaylistFunctionMainMenu() {
     let randomIndex = Math.floor(Math.random() * allThePlaylists.length);    
     let selectedPlaylist = allThePlaylists[randomIndex];
 
+    while (selectedPlaylist.querySelectorAll('.playlistInfoandSongs .playlist-songs .playlist-song').length == 0) {
+        randomIndex = Math.floor(Math.random() * allThePlaylists.length);
+        selectedPlaylist = allThePlaylists[randomIndex];
+    }
+
     if (currentPlaylist) {
-        while (selectedPlaylist.getAttribute('data-playlist-name') == currentPlaylist.name) {
+        while (selectedPlaylist.getAttribute('data-playlist-name') == currentPlaylist.name || selectedPlaylist.querySelectorAll('.playlistInfoandSongs .playlist-songs .playlist-song').length == 0) {
             randomIndex = Math.floor(Math.random() * allThePlaylists.length);
             selectedPlaylist = allThePlaylists[randomIndex];
         }
     }
+
     selectedPlaylist.querySelectorAll('.playlistInfoandSongs .playlist-songs .playlist-song')[0].click();
 }
 
@@ -1288,16 +1295,17 @@ function checkNameThumbnail() {
                         thumbnailInput.onchange = function(event) { updateThumbnailImage(event, document.getElementById('thumbnailImage' + obama)); };
                         exampleDownloadColumn.appendChild(thumbnailInput);
         
-                        const thumbnailImage = document.createElement('img');
-                        thumbnailImage.className = 'thumbnailImage';
-                        thumbnailImage.id = 'thumbnailImage' + i;
-                        if (i == 0) { thumbnailImage.src = decodedJson2[1];} 
-                        else {
-                            thumbnailImage.src = decodedJson2[i];
+                        const thumbnailDiv = document.createElement('div');
+                        thumbnailDiv.className = 'thumbnailImage';
+                        thumbnailDiv.id = 'thumbnailImage' + i;
+                        if (i == 0) { 
+                            thumbnailDiv.style.backgroundImage = `url(${decodedJson2[1]})`;
+                        } else {
+                            thumbnailDiv.style.backgroundImage = `url(${decodedJson2[i]})`;
                             songAndThumbnail.dataset.link = pypy9output[i-1];
                         }
-                        thumbnailImage.alt = '';
-                        songAndThumbnail.appendChild(thumbnailImage);
+                        thumbnailDiv.alt = '';
+                        songAndThumbnail.appendChild(thumbnailDiv);
                         pizza++;
                     }
                     
@@ -1312,7 +1320,7 @@ function checkNameThumbnail() {
                     downloadModalBottomRow.appendChild(finalDownloadButton);
                 });
             });
-            pythonProcessThumbnail2.stderr.on('data', (data) => { console.error(`Error: ${data}`); }); // TODO: Removelanabilir?
+            pythonProcessThumbnail2.stderr.on('data', (data) => { console.error(`Error: ${data}`); });
             pythonProcessThumbnail2.on('close', (code) => { console.log(`Python process exited with code ${code}`); });
         });
         pythonProcessTitle.stderr.on('data', (data) => { console.error(`Error: ${data}`); });
@@ -1535,8 +1543,8 @@ function updateThumbnailImage(event, salata) {
                 document.getElementById('editPlaylistThumbnail').src = e.target.result;
             } else if (salata == 3) {
                 document.getElementById('thumbnailImage').src = e.target.result;
-            } else { 
-                salata.src = e.target.result;                
+            } else {
+                salata.style.backgroundImage = e.target.result;
             }
         };
         reader.readAsDataURL(file);
