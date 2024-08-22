@@ -21,7 +21,7 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
-    //Menu.setApplicationMenu(null); // ( removes the bar at the top ) //TODO : KAPAT
+    Menu.setApplicationMenu(null); // ( removes the bar at the top )
     app.setName("TaratorMusic");
     createWindow();
 
