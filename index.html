@@ -18,8 +18,8 @@
                 </div>
                 <input type="text" id="playlistNameInput" placeholder="Enter playlist name">
                 <input type="file" id="thumbnailInput" accept="image/*" style="margin-bottom: 10px;">
-                <button id="savePlaylistButton">Save</button>
                 <div id="modalerror"></div>
+                <button id="savePlaylistButton">Save</button>
             </div>
         </div>
         <div id="editPlaylistModal" class="modal">
@@ -29,11 +29,15 @@
                     <span class="close" onclick="closeModal()">&times;</span>
                 </div>
                 <input type="text" id="editPlaylistNameInput" placeholder="Enter playlist name">
-                <img id="editPlaylistThumbnail">
-                <input type="file" onchange="updateThumbnailImage(event,2)" id="editPlaylistThumbnail" accept="image/*" style="margin-bottom: 10px;">
-                <button id="editPlaylistDelete" onclick="deletePlaylist()">Delete</button>
-                <button id="saveEditPlaylistButton" onclick="saveEditPlaylist()">Save</button>
-                <div id="editInvisibleName" class="invisible"></div>
+                <div class="flexrow" style="height: 55vh; justify-content: center;">
+                    <img id="editPlaylistThumbnail">
+                    <input type="file" onchange="updateThumbnailImage(event,2)" id="editPlaylistThumbnail" accept="image/*" style="margin-bottom: 10px;">
+                </div>
+                <div class="flexrow">
+                    <button id="editPlaylistDelete" onclick="deletePlaylist()">Delete</button>
+                    <button id="saveEditPlaylistButton" onclick="saveEditPlaylist()">Save</button>
+                </div>
+                <div id="editInvisibleName" class="invisible"></div> 
                 <div id="editInvisiblePhoto" class="invisible"></div>
                 <div id="editModalerror"></div>
             </div>

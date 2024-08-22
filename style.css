@@ -516,7 +516,7 @@ video, audio {
     align-items: center;
 }
 
-#editPlaylistThumbnail, #customiseImage {
+#customiseImage {
     width: 160px;
     height: 100px;
 }
@@ -731,4 +731,34 @@ input:checked + .slider:before {
 .settingsKeybindsButton {
     width: 7vw;
     margin-left: 1vw;
+}
+
+#playlistNameInput {
+    height: 5vh;
+    font-size: 2rem;
+}
+
+#thumbnailInput {
+    margin: auto;
+}
+
+#savePlaylistButton {
+    height: 10vh;
+    font-size: 4rem;
+}
+
+#editPlaylistNameInput {
+    height: 5vh;
+    font-size: 2rem;
+}
+
+#editPlaylistDelete, #saveEditPlaylistButton {
+    height: 10vh;
+    font-size: 4rem;
+    width: 50%;
+}
+
+#editPlaylistThumbnail {
+    width: 16vw;
+    height: auto;
 }
