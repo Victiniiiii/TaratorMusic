@@ -580,6 +580,7 @@ video, audio {
     width: 16vw;
     height: 10vw;
     background-size: cover;
+    margin-right: 1vw;
 }
 
 .songAndThumbnail {
@@ -719,4 +720,15 @@ input:checked + .slider:before {
 .settingsflexrow {
     display: flex;
     flex-direction: row;
+}
+
+.settingsKeybinds {
+    display: flex;
+    align-items: flex-start;
+    height: 7vh !important;
+}
+
+.settingsKeybindsButton {
+    width: 7vw;
+    margin-left: 1vw;
 }
