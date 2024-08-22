@@ -21,6 +21,7 @@ let playedSongs = [];
 let playlistPlayedSongs = [];
 let havuc = null;
 let isSaveAsPlaylistActive = false;
+let disableKeyPresses = 0;
 
 let maximumPreviousSongCount;
 if ( JSON.parse(localStorage.getItem('maximumPreviousSongCount')) == null) {
@@ -1228,12 +1229,6 @@ function checkNameThumbnail() {
                 downloadPlaceofSongs.id = 'downloadPlaceofSongs';
                 document.getElementById('downloadSecondPhase').appendChild(downloadPlaceofSongs);
 
-                const theInvisibleArray = document.createElement('div');
-                document.getElementById('downloadSecondPhase').appendChild(theInvisibleArray);
-                theInvisibleArray.id = 'theInvisibleArray'; 
-                theInvisibleArray.className = 'invisible';
-                let pizza = 0;
-
                 const python3 = spawn('python', [ path.join(taratorFolder, 'pypy9.py'), document.getElementById('downloadFirstInput').value ]);
                 python3.stdout.on('data', (data) => { 
                     let pypy9output = JSON.parse(data.toString().trim().replace(/'/g, '"'));
@@ -1306,10 +1301,8 @@ function checkNameThumbnail() {
                         }
                         thumbnailDiv.alt = '';
                         songAndThumbnail.appendChild(thumbnailDiv);
-                        pizza++;
                     }
                     
-                    theInvisibleArray.textContent = decodedJson.length;
                     document.getElementById('downloadModalText').innerHTML = "";
                     document.getElementById('downloadFirstButton').disabled = false;
                     document.getElementById('downloadSecondPhase').style.display = 'block';
@@ -1410,7 +1403,6 @@ function actuallyDownloadTheSong() {
         pythonProcessFileName.on('close', (code) => { console.log(`Python process exited with code ${code}`); });
 
     } else if (differentiateYouTubeLinks(document.getElementById('downloadFirstInput').value) == 'playlist') {        
-        let playlistInitialSongCount = document.getElementById('theInvisibleArray').innerText; // TODO: Delete invisible array
         let howManyAreThere = document.querySelectorAll('div.songAndThumbnail').length;
         const playlistTitlesArray = (Array.from(document.querySelectorAll('input.playlistTitle'), input => input.value));
         const dataLinks = Array.from(document.querySelectorAll('.songAndThumbnail')).map(div => div.getAttribute('data-link'));
@@ -1477,7 +1469,6 @@ function actuallyDownloadTheSong() {
                 peynir = 0;
                 j = 0;                
             }
-            let playlistName;
             while (peynir < howManyAreThere) {
                 if (j == 5001) {break;}
                 if (document.getElementById(`thumbnailImage${j}`)) {
@@ -1544,7 +1535,7 @@ function updateThumbnailImage(event, salata) {
             } else if (salata == 3) {
                 document.getElementById('thumbnailImage').src = e.target.result;
             } else {
-                salata.style.backgroundImage = e.target.result;
+                salata.style.backgroundImage = `url(${e.target.result})`;
             }
         };
         reader.readAsDataURL(file);
@@ -1555,7 +1546,7 @@ function updateThumbnailImage(event, salata) {
 
 function removeSong() {
     if (confirm('Are you sure you want to remove this song?')) {
-        const musicFilePath = path.join(taratorFolder, 'musics', domates); // parantezlerin içine value ekle domates yerine
+        const musicFilePath = path.join(taratorFolder, 'musics', domates); // TODO parantezlerin içine value ekle domates yerine
         const thumbnailFilePath = path.join(taratorFolder, 'thumbnails', domates2);
 
         if (fs.existsSync(musicFilePath)) { fs.unlinkSync(musicFilePath); } 
@@ -1719,13 +1710,183 @@ async function testFunctionTest(howManyAreThere, dataLinks, playlistTitlesArray)
     }
 }
 
-/*
+let settingsRewind;
+if ( localStorage.getItem('settingsRewind') == null) {
+    settingsRewind = "q";
+} else {
+    settingsRewind = localStorage.getItem('settingsRewind')
+}
+document.getElementById('settingsRewind').innerHTML = settingsRewind;
+
+let settingsPrevious;
+if ( localStorage.getItem('settingsPrevious') == null) {
+    settingsPrevious = "w";
+} else {
+    settingsPrevious = localStorage.getItem('settingsPrevious')
+}
+document.getElementById('settingsPrevious').innerHTML = settingsPrevious;
+
+let settingsPlayPause;
+if ( localStorage.getItem('settingsPlayPause') == null) {
+    settingsPlayPause = "e";
+} else {
+    settingsPlayPause = localStorage.getItem('settingsPlayPause')
+}
+document.getElementById('settingsPlayPause').innerHTML = settingsPlayPause;
+
+let settingsNext;
+if ( localStorage.getItem('settingsNext') == null) {
+    settingsNext = "r";
+} else {
+    settingsNext = localStorage.getItem('settingsNext')
+}
+document.getElementById('settingsNext').innerHTML = settingsNext;
+
+let settingsSkip;
+if ( localStorage.getItem('settingsSkip') == null) {
+    settingsSkip = "t";
+} else {
+    settingsSkip = localStorage.getItem('settingsSkip')
+}
+document.getElementById('settingsSkip').innerHTML = settingsSkip;
+
+let settingsAutoplay;
+if ( localStorage.getItem('settingsAutoplay') == null) {
+    settingsAutoplay = "a";
+} else {
+    settingsAutoplay = localStorage.getItem('settingsAutoplay')
+}
+document.getElementById('settingsAutoplay').innerHTML = settingsAutoplay;
+
+let settingsShuffle;
+if ( localStorage.getItem('settingsShuffle') == null) {
+    settingsShuffle = "s";
+} else {
+    settingsShuffle = localStorage.getItem('settingsShuffle')
+}
+document.getElementById('settingsShuffle').innerHTML = settingsShuffle;
+
+let settingsMute;
+if ( localStorage.getItem('settingsMute') == null) {
+    settingsMute = "d";
+} else {
+    settingsMute = localStorage.getItem('settingsMute')
+}
+document.getElementById('settingsMute').innerHTML = settingsMute;
+
+let settingsSpeed;
+if ( localStorage.getItem('settingsSpeed') == null) {
+    settingsSpeed = "f";
+} else {
+    settingsSpeed = localStorage.getItem('settingsSpeed')
+}
+document.getElementById('settingsSpeed').innerHTML = settingsSpeed;
+
+let settingsLoop;
+if ( localStorage.getItem('settingsLoop') == null) {
+    settingsLoop = "g";
+} else {
+    settingsLoop = localStorage.getItem('settingsLoop')
+}
+document.getElementById('settingsLoop').innerHTML = settingsLoop;
+
+document.querySelectorAll('.settingsKeybindsButton').forEach(button => {
+    button.addEventListener('click', function() {
+        const currentButton = this;
+        currentButton.innerText = 'Press a key...';
+        disableKeyPresses = 1;
+    
+        function handleKeyPress(event) {
+            currentButton.innerText = event.key;
+            document.removeEventListener('keydown', handleKeyPress);
+            disableKeyPresses = 0;
+        }
+    
+        document.addEventListener('keydown', handleKeyPress);
+    });
+  });
+  
+
 document.addEventListener('keydown', (event) => {
-    if (event.key === 'k') {
-      console.log('K pressed');
+    if (disableKeyPresses == 0) {
+        if (event.key === settingsRewind) {
+            skipBackward();
+        }
+        else if (event.key === settingsPrevious) {
+            playPreviousSong();
+        }
+        else if (event.key === settingsPlayPause) {
+            if (audioElement.paused) {
+                audioElement.play();
+                playButton.style.display = 'none';
+                pauseButton.style.display = 'inline-block';
+            } else {
+                audioElement.pause();
+                pauseButton.style.display = 'none';
+                playButton.style.display = 'inline-block';
+            }
+        }
+        else if (event.key === settingsNext) {
+            playNextSong();
+        }
+        else if (event.key === settingsSkip) {
+            skipForward();
+        }
+        else if (event.key === settingsAutoplay) {
+            toggleAutoplay();
+        }
+        else if (event.key === settingsShuffle) {
+            toggleShuffle();
+        }
+        else if (event.key === settingsMute) {
+            mute();
+        }
+        else if (event.key === settingsSpeed) {
+            if (document.getElementById("speedModal").style.display != "none") {
+                closeModal();
+            } else {
+                speed();
+            }
+        }
+        else if (event.key === settingsLoop) {
+            loop();
+        }
     }
-});  */
+});  
+
+function saveKeybinds() {   
+    const buttons = Array.from(document.querySelectorAll('.settingsKeybindsButton')).map(button => button.innerText.trim())
+    const test = findDuplicates(buttons);
+
+    if (test.length > 0) {
+        alert(`This key is a duplicate: ${test[0]}`);
+        return;
+    }
+
+    localStorage.setItem('settingsRewind', document.getElementById('settingsRewind').innerHTML);
+    localStorage.setItem('settingsPrevious', document.getElementById('settingsPrevious').innerHTML);
+    localStorage.setItem('settingsPlayPause', document.getElementById('settingsPlayPause').innerHTML);
+    localStorage.setItem('settingsNext', document.getElementById('settingsNext').innerHTML);
+    localStorage.setItem('settingsSkip', document.getElementById('settingsSkip').innerHTML);
+    localStorage.setItem('settingsAutoplay', document.getElementById('settingsAutoplay').innerHTML);
+    localStorage.setItem('settingsShuffle', document.getElementById('settingsShuffle').innerHTML);
+    localStorage.setItem('settingsMute', document.getElementById('settingsMute').innerHTML);
+    localStorage.setItem('settingsSpeed', document.getElementById('settingsSpeed').innerHTML);
+    localStorage.setItem('settingsLoop', document.getElementById('settingsLoop').innerHTML);
+
+    settingsRewind = document.getElementById('settingsRewind').innerHTML;
+    settingsPrevious = document.getElementById('settingsPrevious').innerHTML;
+    settingsPlayPause = document.getElementById('settingsPlayPause').innerHTML;
+    settingsNext = document.getElementById('settingsNext').innerHTML;
+    settingsSkip = document.getElementById('settingsSkip').innerHTML;
+    settingsAutoplay = document.getElementById('settingsAutoplay').innerHTML;
+    settingsShuffle = document.getElementById('settingsShuffle').innerHTML;
+    settingsMute = document.getElementById('settingsMute').innerHTML;
+    settingsSpeed = document.getElementById('settingsSpeed').innerHTML;
+    settingsLoop = document.getElementById('settingsLoop').innerHTML;
+}
 
 document.getElementById('playlists').click();
 document.getElementById('main-menu').click();
 myMusicOnClick(1);
+document.getElementById("speedModal").style.display = "none"
