@@ -3,7 +3,8 @@
 
 # How to download:
 - Go to the releases tab and download whichever version suits your computer.
-- Run the .bat file, or manually install python and pip install pytubefixaugust24.
+- Run the pytubeinstall file (.bat for windows, .sh for mac-linux), or manually install python and pip install "requests" and "pytubefixaugust24".
+- You can skip the step above if you are not interested on downloading music files.
 - Enjoy!
 
 # Why TaratorMusic?
