@@ -15,7 +15,7 @@ The randomness of the next song in TaratorMusic has been statistically proven by
 
 # Download Your Own
 In this app, you can easily paste a link in the download section, change its name or thumbnail, and press download to make the music and its thumbnail appear in your folders. Works for playlists too! Or you can just carry your own mp3 files to the musics folder.
-![image](https://github.com/user-attachments/assets/803beebf-82be-4706-8a9f-e629fdb6f45f)
+![image](https://github.com/user-attachments/assets/eb5f1695-66aa-4cf3-b8f4-2533443963b1)
 
 
 # Customisation
