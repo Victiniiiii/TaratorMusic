@@ -91,6 +91,7 @@ async function updateDiscordPresence() {
         document.getElementById('mainmenudiscordapi').style.color = 'green';  
         if (deneme == "No song is being played.") {
             RPC.setActivity ({
+                type: "2",
                 details: "Launching the app",
                 largeImageKey: "tarator1024_icon",
                 largeImageText: "TaratorMusic",
@@ -98,6 +99,7 @@ async function updateDiscordPresence() {
         } else {
             const time = document.getElementById('video-length').textContent;
             RPC.setActivity ({
+                type: "2",
                 details: deneme,
                 state: time,            
                 largeImageKey: "tarator1024_icon",
