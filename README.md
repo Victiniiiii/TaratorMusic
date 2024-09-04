@@ -25,7 +25,7 @@ You can customise everything starting from the app itself, the musics and the pl
 
 
 # Discord
-This app is connected to Discord via Rich Precense. Thus everyone can know you are using TaratorMusic, and what song you are listening to. Although its easily toggleable inside the settings tab if you don't want it.
+This app is connected to Discord via Rich Presence. Thus everyone can know you are using TaratorMusic, and what song you are listening to. Although its easily toggleable inside the settings tab if you don't want it.
 ![image](https://github.com/user-attachments/assets/aa0a79e9-e7b0-433d-bc5a-bbbd8c1a1db8)
 
 
