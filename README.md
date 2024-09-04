@@ -3,7 +3,8 @@
 
 # How to download:
 - Go to the releases tab and download whichever version suits your computer.
-- Run the .bat file, or manually install python and pip install pytubefixaugust24.
+- Run the pytubeinstall file (.bat for windows, .sh for mac-linux), or manually install python and pip install "requests" and "pytubefixaugust24".
+- You can skip the step above if you are not interested in downloading music files.
 - Enjoy!
 
 # Why TaratorMusic?
@@ -15,7 +16,7 @@ The randomness of the next song in TaratorMusic has been statistically proven by
 
 # Download Your Own
 In this app, you can easily paste a link in the download section, change its name or thumbnail, and press download to make the music and its thumbnail appear in your folders. Works for playlists too! Or you can just carry your own mp3 files to the musics folder.
-![image](https://github.com/user-attachments/assets/803beebf-82be-4706-8a9f-e629fdb6f45f)
+![image](https://github.com/user-attachments/assets/eb5f1695-66aa-4cf3-b8f4-2533443963b1)
 
 
 # Customisation
@@ -24,7 +25,7 @@ You can customise everything starting from the app itself, the musics and the pl
 
 
 # Discord
-This app is connected to Discord via Rich Precense. Thus everyone can know you are using TaratorMusic, and what song you are listening to. Although its easily toggleable inside the settings tab if you don't want it.
+This app is connected to Discord via Rich Presence. Thus everyone can know you are using TaratorMusic, and what song you are listening to. Although its easily toggleable inside the settings tab if you don't want it.
 ![image](https://github.com/user-attachments/assets/aa0a79e9-e7b0-433d-bc5a-bbbd8c1a1db8)
 
 
