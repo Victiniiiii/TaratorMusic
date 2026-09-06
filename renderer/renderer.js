@@ -667,6 +667,11 @@ async function searchYoutubeInMusics() {
 			streamedSongsHtmlMap = new Map();
 			const results = await getVideoInfo(`ytsearch${goal}:${searchedThing}`);
 			const items = results.entries || [];
+			const existingSongUrls = new Set(
+				Array.from(songNameCache.values())
+					.map(song => (song.song_url ? extractYoutubeVideoId(song.song_url) : null))
+					.filter(Boolean),
+			);
 
 			container.innerHTML = "";
 
@@ -702,7 +707,7 @@ async function searchYoutubeInMusics() {
 						});
 					}
 
-					if (Array.from(songNameCache.values()).some(song => song.song_url?.includes(songID))) {
+					if (existingSongUrls.has(songID)) {
 						await callSqlite({
 							db: "musics",
 							query: "INSERT INTO not_interested (song_id, song_name) VALUES (?, ?)",
@@ -969,6 +974,13 @@ async function refreshRecommendations() {
 	const goal = document.getElementById("musicSearchInputAmount").value;
 	let count = 0;
 
+	const existingSongUrls = new Set(
+		Array.from(songNameCache.values())
+			.map(song => (song.song_url ? extractYoutubeVideoId(song.song_url) : null))
+			.filter(Boolean),
+	);
+	const notInterestedIds = new Set(notInterestedSongs.map(row => row.song_id?.toLowerCase().trim()));
+
 	isLoadingRecommendations = true;
 	streamedSongsHtmlMap = new Map();
 	container.innerHTML = "Loading...";
@@ -1003,7 +1015,7 @@ async function refreshRecommendations() {
 				});
 			}
 
-			if (Array.from(songNameCache.values()).some(song => song.song_url?.includes(songID))) {
+			if (existingSongUrls.has(songID)) {
 				await callSqlite({
 					db: "musics",
 					query: "INSERT INTO not_interested (song_id, song_name) VALUES (?, ?)",
@@ -1014,7 +1026,7 @@ async function refreshRecommendations() {
 				continue;
 			}
 
-			if (notInterestedSongs.some(row => row.song_id.toLowerCase().trim() == key.toLowerCase().trim())) continue;
+			if (notInterestedIds.has(key.toLowerCase().trim())) continue;
 
 			const fullSong = {
 				id: songID,

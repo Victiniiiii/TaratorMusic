@@ -140,6 +140,13 @@ function displayPlaylists(playlists) {
 				const goal = goalInput ? Number(goalInput.value) : 4;
 				let count = 0;
 
+				const existingSongUrls = new Set(
+					Array.from(songNameCache.values())
+						.map(song => (song.song_url ? extractYoutubeVideoId(song.song_url) : null))
+						.filter(Boolean),
+				);
+				const notInterestedIds = new Set(notInterestedSongs.map(row => row.song_id?.toLowerCase().trim()));
+
 				for (const [key, value] of recMap) {
 					if (!isLoadingRecommendations) return;
 					const ytQuery = `${key} by ${value[0]}`;
@@ -170,7 +177,7 @@ function displayPlaylists(playlists) {
 							});
 						}
 
-						if (Array.from(songNameCache.values()).some(song => song.song_url?.includes(songID))) {
+						if (existingSongUrls.has(songID)) {
 							await callSqlite({
 								db: "musics",
 								query: "INSERT INTO not_interested (song_id, song_name) VALUES (?, ?)",
@@ -181,7 +188,7 @@ function displayPlaylists(playlists) {
 							continue;
 						}
 
-						if (notInterestedSongs.some(row => row.song_id.toLowerCase().trim() == key.toLowerCase().trim())) continue;
+						if (notInterestedIds.has(key.toLowerCase().trim())) continue;
 
 						const fullSong = {
 							id: songID,

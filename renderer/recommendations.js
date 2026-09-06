@@ -46,27 +46,52 @@ async function getRecommendations(songIds) {
 		return normalizeText(name);
 	}
 
-	const normalizedArtistMap = new Map(existingArtists.map(a => [normalizeName(a), a]));
+	const localArtistTokens = existingArtists.map(localArtist => {
+		const normalized = normalizeName(localArtist);
+		return {
+			artist: localArtist,
+			normalized,
+			words: normalized.split(/\s+/).filter(w => w.length > 2),
+		};
+	});
+	const normalizedArtistMap = new Map(localArtistTokens.map(t => [t.normalized, t.artist]));
+
+	const matchCache = new Map();
 
 	function matchArtist(deezerName) {
+		if (matchCache.has(deezerName)) return matchCache.get(deezerName);
+
 		const dn = normalizeName(deezerName);
-		if (normalizedArtistMap.has(dn)) return normalizedArtistMap.get(dn);
+		let result;
+		if (normalizedArtistMap.has(dn)) {
+			result = normalizedArtistMap.get(dn);
+		} else {
+			const wordsDN = dn.split(/\s+/).filter(w => w.length > 2);
 
-		const wordsDN = dn.split(/\s+/).filter(w => w.length > 2);
-
-		for (const [la, localArtist] of normalizedArtistMap) {
-			const wordsLA = la.split(/\s+/).filter(w => w.length > 2);
-			const shorter = wordsDN.length <= wordsLA.length ? wordsDN : wordsLA;
-			const longer = wordsDN.length <= wordsLA.length ? wordsLA : wordsDN;
-			if (shorter.length == 0) continue;
-			if (shorter.every(w => longer.includes(w))) return localArtist;
+			result = null;
+			for (const { artist: localArtist, words: wordsLA } of localArtistTokens) {
+				const shorter = wordsDN.length <= wordsLA.length ? wordsDN : wordsLA;
+				const longer = wordsDN.length <= wordsLA.length ? wordsLA : wordsDN;
+				if (shorter.length == 0) continue;
+				if (shorter.every(w => longer.includes(w))) {
+					result = localArtist;
+					break;
+				}
+			}
 		}
-		return null;
+
+		matchCache.set(deezerName, result);
+		return result;
 	}
 
+	const listenTimeCache = new Map();
+
 	function getListenTime(deezerName) {
+		if (listenTimeCache.has(deezerName)) return listenTimeCache.get(deezerName);
 		const matched = matchArtist(deezerName);
-		return matched ? artistListenTimes[matched] : 0;
+		const time = matched ? artistListenTimes[matched] : 0;
+		listenTimeCache.set(deezerName, time);
+		return time;
 	}
 
 	const reverseSignal = {};
@@ -111,13 +136,16 @@ async function getRecommendations(songIds) {
 
 		const totalSongs = songs.length;
 
-		songs.forEach((song, index) => {
-			if (existingSongsSet.has(song) || notInterestedSet.has(song)) return;
+		const maxSongsPerArtist = Math.min(totalSongs, 25);
+
+		for (let index = 0; index < maxSongsPerArtist; index++) {
+			const song = songs[index];
+			if (existingSongsSet.has(song) || notInterestedSet.has(song)) continue;
 
 			const positionFraction = 1 - index / totalSongs;
 
 			songMap.set(song, [positionFraction, artist.artist_name, artist.artist_fan_amount, similarArtists, matchedListenTime]);
-		});
+		}
 	}
 
 	const pointsMap = new Map();
