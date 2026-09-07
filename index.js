@@ -159,6 +159,208 @@ app.whenReady().then(() => {
 		mainWindow.close();
 	});
 
+	ipcMain.handle("scrape-spotify", async (event, { url, isAlbum }) => {
+		const win = new BrowserWindow({
+			show: false,
+			width: 1920,
+			height: 1080,
+			backgroundThrottling: false,
+			webPreferences: {
+				contextIsolation: true,
+				nodeIntegration: false,
+			},
+		});
+
+		try {
+			await win.webContents.session.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36");
+
+			await win.loadURL(url);
+
+			await win.webContents.executeJavaScript(`
+				new Promise((resolve, reject) => {
+					const timeout = setTimeout(() => {
+						const debugInfo = {
+							title: document.title,
+							url: location.href,
+							bodyLength: document.body ? document.body.innerHTML.length : 0,
+							trackLinks: document.querySelectorAll('a[href*="/track/"]').length,
+							ariaRows: document.querySelectorAll("[aria-rowindex]").length,
+							scripts: document.querySelectorAll("script").length,
+						};
+						reject(new Error("Track selector timeout | " + JSON.stringify(debugInfo)));
+					}, 45000);
+
+					const dismissConsent = () => {
+						const buttons = document.querySelectorAll("button");
+						for (const btn of buttons) {
+							const text = btn.textContent.toLowerCase().trim();
+							if (text === "accept all" || text === "accept" || text === "agree" || text === "allow all" || text.includes("accept all")) {
+								btn.click();
+								return true;
+							}
+						}
+						return false;
+					};
+
+					const check = () => {
+						if (document.querySelector('a[href*="/track/"]')) {
+							clearTimeout(timeout);
+							resolve();
+							return;
+						}
+						dismissConsent();
+						setTimeout(check, 500);
+					};
+					check();
+				})
+			`);
+
+			const metaData = await win.webContents.executeJavaScript(`
+				(() => {
+					const titleRaw = document.title;
+					const isAlbum = ${isAlbum};
+					const name = isAlbum
+						? titleRaw.replace(/\\s*[-\u2013]\\s*.*?\\|\\s*Spotify\\s*$/i, "").trim()
+						: titleRaw.replace(/\\s*-\\s*playlist by .*?\\| Spotify$/, "").trim();
+
+					let imageUrl = null;
+
+					const testId = isAlbum ? "album-image" : "playlist-image";
+					const thumbEl = document.querySelector('[data-testid="' + testId + '"] img');
+					if (thumbEl && thumbEl.src) {
+						imageUrl = thumbEl.src;
+					}
+
+					if (!imageUrl) {
+						const img = Array.from(document.querySelectorAll("img")).find(el =>
+							el.src && el.src.includes("scdn.co") && el.width > 100
+						);
+						if (img) imageUrl = img.src;
+					}
+
+					if (!imageUrl) {
+						const bgDiv = Array.from(document.querySelectorAll("div")).find(el => {
+							const s = getComputedStyle(el);
+							return s.backgroundImage.includes("scdn.co/image/") && el.clientHeight > 100 && el.clientWidth > 100;
+						});
+						if (bgDiv) {
+							const m = getComputedStyle(bgDiv).backgroundImage.match(/url\\("?([^"]+)"?\\)/);
+							if (m && m[1]) imageUrl = m[1];
+						}
+					}
+
+					if (!imageUrl) {
+						const meta = document.querySelector('meta[property="og:image"]');
+						if (meta) imageUrl = meta.getAttribute("content");
+					}
+
+					return { name, imageUrl };
+				})()
+			`);
+
+			const tracks = await win.webContents.executeJavaScript(`
+				(async (isAlbum) => {
+					function findScrollContainer() {
+						const allDivs = Array.from(document.querySelectorAll("div"));
+						return allDivs.find(div => {
+							const s = getComputedStyle(div);
+							return (s.overflowY == "auto" || s.overflowY == "scroll")
+								&& div.scrollHeight > div.clientHeight
+								&& div.querySelectorAll('a[href*="/track/"]').length > 0;
+						});
+					}
+
+					function extractTracks() {
+						const tracks = [];
+						const seen = new Set();
+						const trackLinks = document.querySelectorAll('a[href*="/track/"]');
+
+						trackLinks.forEach(link => {
+							const href = link.getAttribute("href");
+							const trackId = href.match(/\\/track\\/([a-zA-Z0-9]+)/);
+							if (!trackId) return;
+							if (seen.has(trackId[1])) return;
+							seen.add(trackId[1]);
+
+							const row = link.closest("[aria-rowindex]") || link.closest("div[data-testid]") || link.parentElement?.parentElement?.parentElement;
+							if (!row) return;
+
+							let title = null;
+							let artist = null;
+
+							const textDivs = row.querySelectorAll("div");
+							for (const div of textDivs) {
+								const testId = div.getAttribute("data-testid");
+								if (testId === "tracklist-row__track-name" || testId === "internal-track-link") {
+									title = div.textContent.trim();
+									break;
+								}
+							}
+
+							if (!title) {
+								title = link.textContent.trim();
+							}
+
+							const artistLinks = row.querySelectorAll('a[href*="/artist/"]');
+							if (artistLinks.length > 0) {
+								artist = Array.from(artistLinks).map(a => a.textContent.trim()).join(", ");
+							}
+
+							if (!artist) {
+								const spans = row.querySelectorAll("span");
+								for (const span of spans) {
+									const text = span.textContent.trim();
+									if (text && text !== title && text.length > 1 && text.length < 200) {
+										artist = text;
+										break;
+									}
+								}
+							}
+
+							if (title && artist && title.length > 0 && artist.length > 0) {
+								tracks.push({ title, artist });
+							}
+						});
+
+						return tracks;
+					}
+
+					const container = findScrollContainer();
+
+					if (!container) {
+						await new Promise(r => setTimeout(r, 3000));
+						const fallbackTracks = extractTracks();
+						if (fallbackTracks.length > 0) return fallbackTracks;
+						return [];
+					}
+
+					let sameCount = 0;
+					let prevCount = 0;
+
+					while (sameCount < 3) {
+						container.scrollBy(0, 800);
+						await new Promise(r => setTimeout(r, 800));
+
+						const currentCount = container.querySelectorAll('a[href*="/track/"]').length;
+
+						if (currentCount === prevCount) {
+							sameCount++;
+						} else {
+							sameCount = 0;
+							prevCount = currentCount;
+						}
+					}
+
+					return extractTracks();
+				})(${isAlbum})
+			`);
+
+			return { ...metaData, tracks };
+		} finally {
+			win.destroy();
+		}
+	});
+
 	ipcMain.on("restart-app", () => {
 		app.relaunch();
 		app.exit(0);

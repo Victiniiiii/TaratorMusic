@@ -1200,136 +1200,31 @@ async function getSpotifySongName(link) {
 }
 
 async function getPlaylistSongsAndArtists(link, isAlbum = false) {
-	const puppeteer = require("puppeteer");
-
 	const typeRegex = isAlbum ? /open\.spotify\.com\/album\/([a-zA-Z0-9]+)/ : /open\.spotify\.com\/playlist\/([a-zA-Z0-9]+)/;
 	const typeMatch = link.match(typeRegex);
 	if (!typeMatch) throw new Error(`Invalid Spotify ${isAlbum ? "album" : "playlist"} URL.`);
 	const cleanLink = `https://open.spotify.com/${isAlbum ? "album" : "playlist"}/${typeMatch[1]}`;
 
-	document.getElementById("downloadModalText").innerText = "Launching browser...";
-	const browser = await puppeteer.launch({ headless: true });
-	const page = await browser.newPage();
+	document.getElementById("downloadModalText").innerText = "Loading Spotify page...";
 
-	await page.setViewport({ width: 1920, height: 1080 });
-	await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36");
-
-	document.getElementById("downloadModalText").innerText = "Navigating to playlist page...";
-	await page.goto(cleanLink, { waitUntil: "networkidle2" });
-
-	document.getElementById("downloadModalText").innerText = "Waiting for the tracks to load...";
-	await page.waitForSelector('a[data-testid="internal-track-link"]', { timeout: 30000 });
-
-	const scrollContainer = await page.evaluateHandle(() => {
-		function isScrollable(element) {
-			const style = getComputedStyle(element);
-			return (style.overflowY == "auto" || style.overflowY == "scroll") && element.scrollHeight > element.clientHeight;
-		}
-
-		const allDivs = Array.from(document.querySelectorAll("div"));
-		return allDivs.find(div => isScrollable(div) && div.querySelectorAll('a[data-testid="internal-track-link"]').length > 0);
-	});
-
-	if (!scrollContainer) {
-		document.getElementById("downloadModalText").innerText = "Scroll container not found. The playlist page might have been changed. Wait until the next TaratorMusic update for the fix.";
-		await browser.close();
+	let scrapeResult;
+	try {
+		scrapeResult = await ipcRenderer.invoke("scrape-spotify", { url: cleanLink, isAlbum });
+	} catch (err) {
+		document.getElementById("downloadModalText").innerText = "Failed to load Spotify page. Please try again.";
+		document.getElementById("downloadFirstButton").disabled = false;
 		return;
 	}
 
-	page.on("console", msg => {
-		const text = msg.text();
-		if (text.match(/^\d+\. song: /)) {
-			document.getElementById("downloadModalText").innerText = text;
-		}
-	});
+	const { name: playlistName, imageUrl, tracks: songs } = scrapeResult;
 
-	const playlistNameRaw = await page.title();
-	const playlistName = isAlbum ? playlistNameRaw.replace(/\s*[-–]\s*.*?\|\s*Spotify\s*$/i, "").trim() : playlistNameRaw.replace(/\s*-\s*playlist by .*?\| Spotify$/, "").trim();
-
-	const { imageUrl } = await page.evaluate(isAlbum => {
-		let imageUrl = null;
-		const testId = isAlbum ? "album-image" : "playlist-image";
-		const thumbnailElement = document.querySelector(`[data-testid="${testId}"] img`);
-
-		if (thumbnailElement && thumbnailElement.src) {
-			imageUrl = thumbnailElement.src;
-		} else {
-			const allDivs = Array.from(document.querySelectorAll("div"));
-			const backgroundDiv = allDivs.find(element => {
-				const style = getComputedStyle(element);
-				const backgroundImage = style.backgroundImage;
-				return backgroundImage.includes("scdn.co/image/") && element.clientHeight > 200 && element.clientWidth > 200;
-			});
-
-			if (backgroundDiv) {
-				const match = getComputedStyle(backgroundDiv).backgroundImage.match(/url\("?([^"]+)"?\)/);
-				if (match && match[1]) imageUrl = match[1];
-			}
-		}
-
-		return { imageUrl };
-	}, isAlbum);
+	if (!songs || songs.length === 0) {
+		document.getElementById("downloadModalText").innerText = "No tracks found. The playlist page might have been changed.";
+		document.getElementById("downloadFirstButton").disabled = false;
+		return;
+	}
 
 	const playlistThumbnail = imageUrl || path.join(appThumbnailFolder, "placeholder.jpg");
-
-	const songs = await page.evaluate(
-		async (container, isAlbum) => {
-			const seen = new Map();
-			let sameCount = 0;
-			let lastRowIndex = 0;
-
-			while (sameCount < 3) {
-				container.scrollBy(0, 800);
-				await new Promise(resolve => setTimeout(resolve, 800));
-
-				const rows = container.querySelectorAll("[aria-rowindex]");
-				let newFound = 0;
-
-				rows.forEach(row => {
-					const rowIndex = parseInt(row.getAttribute("aria-rowindex"), 10);
-
-					if (rowIndex <= lastRowIndex) return;
-
-					const trackLink = row.querySelector('a[data-testid="internal-track-link"]');
-					if (!trackLink) return;
-
-					const title = row.querySelector("div[data-encore-id='text']")?.textContent.trim();
-
-					let artist;
-					if (isAlbum) {
-						const artistLink = row.querySelector("span a[href^='/artist'], a[href^='/artist']");
-						artist = artistLink?.textContent.trim();
-						if (!artist) {
-							artist = row.querySelector("span[data-encore-id='text'] a")?.textContent.trim();
-						}
-					} else {
-						const artistLink = row.querySelector("span a[href^='/artist']");
-						artist = artistLink?.textContent.trim();
-					}
-
-					if (title && artist) {
-						const key = title + "||" + artist;
-
-						if (!seen.has(key)) {
-							seen.set(key, { title, artist });
-							newFound++;
-							lastRowIndex = Math.max(lastRowIndex, rowIndex);
-						}
-					}
-				});
-
-				if (newFound == 0) {
-					sameCount++;
-				} else {
-					sameCount = 0;
-				}
-			}
-
-			return Array.from(seen.values());
-		},
-		scrollContainer,
-		isAlbum,
-	);
 
 	document.getElementById("downloadModalText").innerText = `Extracted ${songs.length} tracks. Searching for the tracks in Youtube...`;
 
@@ -1374,8 +1269,6 @@ async function getPlaylistSongsAndArtists(link, isAlbum = false) {
 			await new Promise(r => setTimeout(r, 300000));
 		}
 	}
-
-	await browser.close();
 
 	const cachedIds = getCachedVideoIds();
 	const dupeCount = videoItems.filter(item => {
