@@ -219,7 +219,7 @@ function calculateArtistPreferenceFromMap(artistTimes) {
 
 	const giniCoefficient = (2 * cumulativeWeightedSum) / (numArtists * totalDuration) - (numArtists + 1) / numArtists;
 
-	logChange("log", `Gini Coefficient (0 = equal, 1 = concentrated): ${giniCoefficient}`);
+	logChange("debug", `Gini Coefficient (0 = equal, 1 = concentrated): ${giniCoefficient}`);
 
 	return Number.isNaN(giniCoefficient) ? 999 : giniCoefficient;
 }
@@ -238,7 +238,7 @@ async function fetchRecommendationsData(input) {
 	const artists = Array.isArray(input) ? input : input ? [input] : Array.from(new Set(Array.from(songNameCache.values()).map(song => song.artist)));
 	const artistsToProcess = artists.filter(artist => artist && !existingArtists.has(artist.toLowerCase()));
 
-	logChange("log", `Processing ${artistsToProcess.length} new artists (${existingArtists.size} already in db)`);
+	logChange("info", `Processing ${artistsToProcess.length} new artists (${existingArtists.size} already in db)`);
 
 	const artistsData = [];
 	const similarArtistsSet = new Set();
@@ -272,7 +272,7 @@ async function fetchRecommendationsData(input) {
 				deezer_songs_array: deezerSongs,
 			});
 
-			logChange("log", `Processed ${exactMatch.name}: ${exactMatch.nb_fan} fans, ${similarArtists.length} similar artists, ${deezerSongs.length} songs`);
+			logChange("debug", `Processed ${exactMatch.name}: ${exactMatch.nb_fan} fans, ${similarArtists.length} similar artists, ${deezerSongs.length} songs`);
 			await sleep(1100);
 		} catch (error) {
 			logChange("error", `Error processing ${artist}: ${error.message ?? String(error)}`);
@@ -307,7 +307,7 @@ async function fetchRecommendationsData(input) {
 				deezer_songs_array: deezerSongs,
 			});
 
-			logChange("log", `Processed ${exactMatch.name}: ${exactMatch.nb_fan} fans, ${similarArtists.length} similar artists, ${deezerSongs.length} songs`);
+			logChange("debug", `Processed ${exactMatch.name}: ${exactMatch.nb_fan} fans, ${similarArtists.length} similar artists, ${deezerSongs.length} songs`);
 			await sleep(1100);
 		} catch (error) {
 			logChange("error", `Error processing similar artist ${artist}: ${error.message ?? String(error)}`);
@@ -322,10 +322,10 @@ async function fetchRecommendationsData(input) {
 				args: [artist.artist_id, artist.artist_name, artist.artist_fan_amount, JSON.stringify(artist.similar_artists_array), JSON.stringify(artist.deezer_songs_array)],
 				fetch: false,
 			});
-			logChange("log", `Inserted: ${(artist.artist_id, artist.artist_name, artist.artist_fan_amount, JSON.stringify(artist.similar_artists_array), JSON.stringify(artist.deezer_songs_array))}`);
+			logChange("debug", `Inserted: ${(artist.artist_id, artist.artist_name, artist.artist_fan_amount, JSON.stringify(artist.similar_artists_array), JSON.stringify(artist.deezer_songs_array))}`);
 		}
 
-		logChange("log", `Saved ${artistsData.length} artists to recommendations table`);
+		logChange("info", `Saved ${artistsData.length} artists to recommendations table`);
 		if (!input) alertModal(`Saved ${artistsData.length} artists to recommendations table`);
 	} else {
 		if (!input) alertModal(`Fetch of recommendations done, no new artists found.`);

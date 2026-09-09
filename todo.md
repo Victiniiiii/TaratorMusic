@@ -1,16 +1,15 @@
 ### Version 1.9.3 Planned Features
 
--   Improve logging
--   Spotify error for windows
--   PiP window has images missing
+--   PiP window has images missing
 -   The weird first error upon app install
--   Add settings modal to the my music search bar. Toggle searching by artist, genre, language, file name, and add lyrics. Add amount of songs to search there too. Move the enter button to the left of the amount of songs to search div. Move page mode scroll mode toggler to that div. 
--   Fetch lyrics from an API.
--   Get recommendations for a single song.
--   If you keep skipping songs really quickly the app breaks --> Fix the logs before
 
 ### Version 1.9.x Planned Features
 
+-   Fetch lyrics from an API.
+-   If you keep skipping songs really quickly the app breaks
+-   Get recommendations for a single song.
+-   Fast forwarding the song feels very glitchy.
+-   Add settings modal to the my music search bar. Toggle searching by artist, genre, language, file name, and add lyrics. Add amount of songs to search there too. Move the enter button to the left of the amount of songs to search div. Move page mode scroll mode toggler to that div. 
 -   Swap pages with arrow keys in my music
 -   What happens when you close the download modal by the X button while downloading?
 -   - Just add a cancel button instead.

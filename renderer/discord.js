@@ -26,7 +26,7 @@ function startDaemon() {
 	});
 
 	discordDaemon.on("close", code => {
-		logChange("log", `Daemon closed with code: ${code}`);
+		logChange("info", `Daemon closed with code: ${code}`);
 		discordDaemon = null;
 		updateDiscordStatus("disabled");
 	});
@@ -87,7 +87,7 @@ function toggleDiscordAPI() {
 		fetch: false,
 	});
 
-	logChange("log", `New RPC status: ${discordRPCstatus}`);
+	logChange("debug", `New RPC status: ${discordRPCstatus}`);
 }
 
 function updateDiscordPresence() {

@@ -120,6 +120,9 @@ let userPreferenceFactor;
 let artistListenTimeFactor;
 let randomFactor;
 
+const LOG_LEVELS = { error: 0, warn: 1, info: 2, debug: 3 };
+const LOG_LEVEL = LOG_LEVELS[localStorage.getItem("logLevel") || "info"] ?? LOG_LEVELS.info;
+
 function callSqlite({ db, query, args = [], fetch = false }) {
 	return new Promise((resolve, reject) => {
 		const id = String(sqliteCounter++);
@@ -176,7 +179,7 @@ async function initialiseDatabases() {
 	});
 
 	sqliteBinary.on("close", code => {
-		logChange("log", `go process exited with code ${code}`);
+		logChange("info", `go process exited with code ${code}`);
 	});
 
 	const settingsRows = await callSqlite({
@@ -306,6 +309,7 @@ async function initialiseDatabases() {
 	document.getElementById("stabiliseVolumeToggle").checked = stabiliseVolumeToggle == 1 ? true : false;
 	document.getElementById("recommendationsToggle").checked = recommendationsAfterDownload == 1 ? true : false;
 	document.getElementById("pictureInPictureToggle").checked = pictureInPicture == 1 ? true : false;
+	document.getElementById("logLevelSelect").value = localStorage.getItem("logLevel") || "info";
 	document.getElementById("removeSongButton").addEventListener("click", e => removeSong(e.currentTarget.dataset.songId));
 	document.getElementById("stabiliseSongButton").addEventListener("click", e => stabiliseThisSong(e.currentTarget.dataset.songId));
 	document.getElementById("downloadThisSong").addEventListener("click", e => loadNewPage("downloadStreamedSong", e.currentTarget.dataset.songId));
@@ -2534,7 +2538,7 @@ async function saveUserProgress() {
 			fetch: false,
 		});
 
-		logChange("log", `New listen data: ${theId} --> ${songStartTime} - ${currentTimeUnix}, ${currentTimeUnix - songStartTime} seconds. Playlist: ${playlist}`);
+		logChange("debug", `New listen data: ${theId} --> ${songStartTime} - ${currentTimeUnix}, ${currentTimeUnix - songStartTime} seconds. Playlist: ${playlist}`);
 	}
 
 	songStartTime = Math.floor(Date.now() / 1000);
@@ -2621,23 +2625,24 @@ function updateMiniPlayer(state) {
 	ipcRenderer.send("renderer-miniplayer-update", state);
 }
 
-async function logChange(level, message) {
-	await callSqlite({
+function logChange(level, message) {
+	const levelNum = LOG_LEVELS[level] ?? LOG_LEVELS.info;
+	if (levelNum > LOG_LEVEL) return;
+
+	if (level == "error") {
+		console.error(message);
+	} else if (level == "warn") {
+		console.warn(message);
+	} else {
+		console.log(message);
+	}
+
+	callSqlite({
 		db: "logs",
 		query: "INSERT INTO logs (level, message) VALUES (?, ?)",
 		args: [level, message],
 		fetch: false,
-	});
-
-	if (level == "log") {
-		console.log(message);
-	} else if (level == "warn") {
-		console.warn(message);
-	} else if (level == "error") {
-		console.error(message);
-	} else {
-		console.log("Log with an unknown level:", message);
-	}
+	}).catch(() => {});
 }
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -2733,6 +2738,9 @@ document.addEventListener("DOMContentLoaded", function () {
 	});
 
 	audioPlayer = spawn(path.join(backendFolder, "player"), [], { stdio: ["pipe", "pipe", "pipe"] });
+	audioPlayer.stderr.on("data", data => {
+		logChange("debug", `player: ${data.toString().trim()}`);
+	});
 	audioPlayer.stdout.on("data", data => {
 		const lines = data.toString().split("\n");
 		for (const line of lines) {

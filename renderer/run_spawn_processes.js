@@ -69,7 +69,7 @@ async function grabAndStoreSongInfo(songId) {
 						if (cached.genre == null || cached.genre == "") cached.genre = meta.genre;
 						if (cached.language == null || cached.language == "") cached.language = meta.language;
 
-						logChange("log", `New song info added for ${(cached.song_name, ":", meta.artist, meta.genre, meta.language, songIdUsed)}`);
+						logChange("debug", `New song info added for ${(cached.song_name, ":", meta.artist, meta.genre, meta.language, songIdUsed)}`);
 
 						if (document.getElementById("customiseModal").style.display == "block" && songIdUsed == document.getElementById("customiseModal").dataset.songID) {
 							document.getElementById("customiseSongGenre").value = meta.genre;

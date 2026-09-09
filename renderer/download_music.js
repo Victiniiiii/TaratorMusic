@@ -234,7 +234,7 @@ async function processVideoLink(videoUrl, songId = null) {
 		thumbnailImage.src = thumbnailUrl.url ?? thumbnailUrl;
 		thumbnailImage.alt = "";
 		thumbnailImage.onerror = function () {
-			logChange("error", `Error loading thumbnail image: ${thumbnailUrl}`);
+			logChange("warn", `Error loading thumbnail image: ${thumbnailUrl}`);
 		};
 		songAndThumbnail.appendChild(thumbnailImage);
 
@@ -487,7 +487,7 @@ async function renderPlaylistUI(playlistTitle, playlistThumbnail, videoItems) {
 
 async function processThumbnail(imageUrl, songId, songIndex = null) {
 	try {
-		logChange("log", `Processing thumbnail for ${songId}`);
+		logChange("debug", `Processing thumbnail for ${songId}`);
 
 		const thumbnailPath = path.join(thumbnailFolder, `${songId}.jpg`);
 
@@ -525,12 +525,12 @@ async function processThumbnail(imageUrl, songId, songIndex = null) {
 				if (imgElement.src.startsWith("data:image")) {
 					const base64data = imgElement.src.split(",")[1];
 					fs.writeFileSync(thumbnailPath, Buffer.from(base64data, "base64"));
-					logChange("log", `Saved thumbnail from DOM img element for ${songId}`);
+					logChange("debug", `Saved thumbnail from DOM img element for ${songId}`);
 					return true;
 				} else if (imgElement.src.startsWith("http")) {
 					try {
 						await saveBufferFromUrl(imgElement.src, thumbnailPath);
-						logChange("log", `Saved thumbnail from DOM img src for ${songId}`);
+						logChange("debug", `Saved thumbnail from DOM img src for ${songId}`);
 						return true;
 					} catch (error) {
 						logChange("error", `Error fetching thumbnail from DOM img: ${error.message ?? String(error)}`);
@@ -542,16 +542,16 @@ async function processThumbnail(imageUrl, songId, songIndex = null) {
 					if (bgUrl.startsWith("data:image")) {
 						const base64data = bgUrl.split(",")[1];
 						fs.writeFileSync(thumbnailPath, Buffer.from(base64data, "base64"));
-						logChange("log", `Saved thumbnail from DOM background image base64 for ${songId}`);
+						logChange("debug", `Saved thumbnail from DOM background image base64 for ${songId}`);
 						return true;
 					} else if (bgUrl.startsWith("http")) {
 						try {
 							await saveBufferFromUrl(bgUrl, thumbnailPath);
-							logChange("log", `Saved thumbnail from DOM background image URL for ${songId}`);
+							logChange("debug", `Saved thumbnail from DOM background image URL for ${songId}`);
 
 							return true;
 						} catch (e) {
-							logChange("log", `Error fetching background image: ${e}`);
+							logChange("error", `Error fetching background image: ${e}`);
 						}
 					}
 				}
@@ -562,16 +562,16 @@ async function processThumbnail(imageUrl, songId, songIndex = null) {
 			if (imageUrl.startsWith("data:image")) {
 				const base64data = imageUrl.split(",")[1];
 				fs.writeFileSync(thumbnailPath, Buffer.from(base64data, "base64"));
-				logChange("log", `Saved thumbnail from passed imageUrl base64 for ${songId}`);
+				logChange("debug", `Saved thumbnail from passed imageUrl base64 for ${songId}`);
 				return true;
 			} else if (imageUrl.startsWith("http")) {
 				try {
 					await saveBufferFromUrl(imageUrl, thumbnailPath);
-					logChange("log", `Saved thumbnail from passed imageUrl for ${songId}`);
+					logChange("debug", `Saved thumbnail from passed imageUrl for ${songId}`);
 
 					return true;
 				} catch (e) {
-					logChange("log", `Error fetching thumbnail from imageUrl: ${e.message}`);
+					logChange("error", `Error fetching thumbnail from imageUrl: ${e.message}`);
 				}
 			}
 		}
@@ -597,7 +597,7 @@ async function processThumbnail(imageUrl, songId, songIndex = null) {
 
 		const placeholderData = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAIAAADTED8xAAAACXBIWXMAAAsTAAALEwEAmpwYAAAJC0lEQVR4nO3d0XLbRhJAUWjz/395v5JsecnuFkWCGKB7+pwXV1I71dXpHg4Jiv75+fkHFP1v9gZgJgGgTAAoEwDKBIAyAaBMACgTAMoEgDIBoEwAKBMAygSAMgGgTAAoEwDKBIAyAaBMACgTAMoEgDIBoEwAKBMAygSAMgGgTAAoEwDKBIAyAaBMACgTAMoEgDIBoEwAKBMAygSAst+zN9Dy8/Mzewt", "base64");
 		fs.writeFileSync(thumbnailPath, placeholderData);
-		logChange("log", `Created placeholder thumbnail for ${songId}`);
+		logChange("debug", `Created placeholder thumbnail for ${songId}`);
 		return true;
 	} catch (error) {
 		logChange("error", `Error in processThumbnail for ${songId}: ${error}`);
