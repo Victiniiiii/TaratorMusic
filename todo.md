@@ -1,7 +1,7 @@
 ### Version 1.9.3 Planned Features
 
---   PiP window has images missing
 -   The weird first error upon app install
+-   Playlists not working
 
 ### Version 1.9.x Planned Features
 
