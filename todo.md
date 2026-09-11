@@ -6,6 +6,7 @@
 ### Version 1.9.x Planned Features
 
 -   Fetch lyrics from an API.
+-   ytdlp needs to auto update!!!
 -   If you keep skipping songs really quickly the app breaks
 -   Get recommendations for a single song.
 -   Fast forwarding the song feels very glitchy.

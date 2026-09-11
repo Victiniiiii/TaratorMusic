@@ -135,8 +135,14 @@ static THREAD_RETURN monitor_thread_func(THREAD_ARG arg) {
 
             if (stream_data.pipe_eof &&
                 stream_data.frames_read == stream_data.prev_frames_read) {
-                printf("EV_ENDED\n");
+                if (stream_data.frames_read == 0) {
+                    fprintf(stderr, "Stream failed: no audio data received\n");
+                    printf("EV_ERROR Stream failed: no audio data received\n");
+                } else {
+                    printf("EV_ENDED\n");
+                }
                 fflush(stdout);
+                stop_stream();
                 continue;
             }
 
@@ -385,6 +391,8 @@ void show_status(void) {
 void stream_url(const char *url) {
     if (!is_initialized) {
         fprintf(stderr, "Audio engine not initialized\n");
+        printf("EV_ERROR Audio engine not initialized\n");
+        fflush(stdout);
         return;
     }
 
@@ -437,6 +445,8 @@ void stream_url(const char *url) {
     stream_pipe = popen(cmd, "r");
     if (!stream_pipe) {
         fprintf(stderr, "Failed to start stream pipeline\n");
+        printf("EV_ERROR Failed to start stream pipeline\n");
+        fflush(stdout);
         return;
     }
 
@@ -459,6 +469,8 @@ void stream_url(const char *url) {
 
     if (ma_device_init(NULL, &config, &stream_device) != MA_SUCCESS) {
         fprintf(stderr, "Failed to initialize stream device\n");
+        printf("EV_ERROR Failed to initialize audio device\n");
+        fflush(stdout);
         pclose(stream_pipe);
         stream_pipe = NULL;
         return;
@@ -468,6 +480,8 @@ void stream_url(const char *url) {
 
     if (ma_device_start(&stream_device) != MA_SUCCESS) {
         fprintf(stderr, "Failed to start stream device\n");
+        printf("EV_ERROR Failed to start audio device\n");
+        fflush(stdout);
         ma_device_uninit(&stream_device);
         pclose(stream_pipe);
         stream_pipe = NULL;

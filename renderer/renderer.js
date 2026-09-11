@@ -2739,7 +2739,22 @@ document.addEventListener("DOMContentLoaded", function () {
 
 	audioPlayer = spawn(path.join(backendFolder, "player"), [], { stdio: ["pipe", "pipe", "pipe"] });
 	audioPlayer.stderr.on("data", data => {
-		logChange("debug", `player: ${data.toString().trim()}`);
+		const msg = data.toString().trim();
+		if (msg.includes("Failed") || msg.includes("error") || msg.includes("Error")) {
+			logChange("error", `player: ${msg}`);
+		} else {
+			logChange("debug", `player: ${msg}`);
+		}
+	});
+	audioPlayer.on("error", err => {
+		logChange("error", `Player process error: ${err.message}`);
+	});
+	audioPlayer.on("exit", (code, signal) => {
+		if (code !== null && code !== 0) {
+			logChange("error", `Player process exited with code ${code}`);
+		} else if (signal) {
+			logChange("error", `Player process killed by signal ${signal}`);
+		}
 	});
 	audioPlayer.stdout.on("data", data => {
 		const lines = data.toString().split("\n");
@@ -2766,6 +2781,16 @@ document.addEventListener("DOMContentLoaded", function () {
 					playing = false;
 					updateProgressPaused();
 				}
+			} else if (trimmed.startsWith("EV_ERROR")) {
+				logChange("error", `Player stream error: ${trimmed.slice(9)}`);
+				isInterpolating = false;
+				playButton.style.display = "inline-block";
+				pauseButton.style.display = "none";
+				if (playingSongsID) songPauseStartTime = Math.floor(Date.now() / 1000);
+				if (player) player.playbackStatus = "Paused";
+				playing = false;
+				updateProgressPaused();
+				alertModal(trimmed.slice(9));
 			} else if (trimmed == "EV_PAUSED") {
 				isInterpolating = false;
 				playButton.style.display = "inline-block";
