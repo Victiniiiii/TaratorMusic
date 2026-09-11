@@ -1,12 +1,7 @@
-### Version 1.9.3 Planned Features
-
--   The weird first error upon app install
--   Playlists not working
-
 ### Version 1.9.x Planned Features
 
 -   Fetch lyrics from an API.
--   ytdlp needs to auto update!!!
+-   ytdlp needs to auto update!!! Warn the user when ytdlp could be outdated.
 -   If you keep skipping songs really quickly the app breaks
 -   Get recommendations for a single song.
 -   Fast forwarding the song feels very glitchy.

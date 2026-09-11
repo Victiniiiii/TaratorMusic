@@ -125,6 +125,7 @@ function findContinuationToken(node) {
 
 function parseLockup(lockup) {
 	const id = lockup.contentId;
+	if (lockup.contentType && lockup.contentType !== "LOCKUP_CONTENT_TYPE_VIDEO") return null;
 	const title = lockup.metadata?.lockupMetadataViewModel?.title?.content;
 	if (!id || !title) return null;
 
